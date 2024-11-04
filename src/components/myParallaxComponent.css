@@ -1,0 +1,14 @@
+.parallax-container {
+    font-family: 'Arial', sans-serif;
+  }
+  
+  /* Styling Individual Parallax Sections */
+  .parallax-section {
+    display: flex;
+    align-items: center;
+    justify-content: top;
+    height: 100px;
+    position: right;
+    color: #fff;
+    background-color: rgba(0, 0, 0, 0.922); /* Slight overlay for readability */
+  }

@@ -5,6 +5,8 @@ import Header from './components/Header';
 import MyParallaxComponent from "./components/myParallaxcomponent";
 import NavMobile from "./components/NavMobile";
 import Cards from "./components/Cards";
+import Facts from "./components/Facts";
+import Features from "./components/Features";
 
 function App(){
   return(
@@ -14,6 +16,8 @@ function App(){
       <MyParallaxComponent/>
       <NavMobile/>
       <Cards/>
+      <Facts/>
+      <Features/>
 
       
       

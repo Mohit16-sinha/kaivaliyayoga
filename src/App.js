@@ -7,6 +7,9 @@ import NavMobile from "./components/NavMobile";
 import Cards from "./components/Cards";
 import Facts from "./components/Facts";
 import Features from "./components/Features";
+import Courseva from "./components/Courseva";
+
+
 
 function App(){
   return(
@@ -18,6 +21,9 @@ function App(){
       <Cards/>
       <Facts/>
       <Features/>
+      <Courseva/>
+      
+      
 
       
       

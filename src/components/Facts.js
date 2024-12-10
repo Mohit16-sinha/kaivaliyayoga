@@ -18,39 +18,40 @@ const Facts = () => {
   return (
     <section className="py-8">
       <div className="container mx-auto">
-        {/* Facts Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-          {facts.map((item, index) => {
-            return (
-              <div
-                key={index}
-                className={`text-center p-6 rounded-lg shadow-md text-white ${item.color}`}
-              >
-                {/* Display number with CountUp */}
-                <h2 className="text-4xl font-bold mb-2">
-                  <CountUp end={item.number} duration={2} enableScrollSpy />
-                  {item.unit}
-                </h2>
-                {/* Display fact text */}
-                <p className="text-lg font-medium">{item.text}</p>
-              </div>
-            );
-          })}
-        </div>
+        {/* Responsive Layout */}
+        <div className="flex flex-col lg:flex-row items-center gap-12">
+          {/* Facts Section */}
+          <div className="flex-1">
+            <div className="grid grid-cols-2 lg:grid-cols-2 gap-6">
+              {facts.map((item, index) => (
+                <div
+                  key={index}
+                  className={`text-center p-6 rounded-lg shadow-md text-white ${item.color}`}
+                >
+                  <h2 className="text-4xl font-bold mb-2">
+                    <CountUp end={item.number} duration={2} enableScrollSpy />
+                    {item.unit}
+                  </h2>
+                  <p className="text-lg font-medium">{item.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
 
-        {/* Image and Text Section */}
-        <div className="mt-12 text-center">
-          <img
-            src={image}
-            alt="John Cena"
-            className="w-40 mx-auto rounded-full border-4 border-gray-200"
-          />
-          <h3 className="mt-4 text-2xl font-semibold text-gray-700">
-            Relax and enjoy a personalized yoga day with us
-          </h3>
-          <p className="mt-2 text-lg text-gray-600">
-            Experience the perfect blend of relaxation and rejuvenation.
-          </p>
+          {/* Image Section */}
+          <div className="flex-1 lg:text-right text-center">
+            <img
+              src={image}
+              alt="Personalized Yoga"
+              className="w-64 h-64 mx-auto lg:ml-auto lg:mr-0 rounded-full border-4 border-gray-200"
+            />
+            <h3 className="mt-6 text-2xl font-semibold text-gray-700">
+              Relax and enjoy a personalized yoga day with us
+            </h3>
+            <p className="mt-2 text-lg text-gray-600">
+              Experience the perfect blend of relaxation and rejuvenation.
+            </p>
+          </div>
         </div>
       </div>
     </section>

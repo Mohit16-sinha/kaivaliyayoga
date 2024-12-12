@@ -8,6 +8,7 @@ import Cards from "./components/Cards";
 import Facts from "./components/Facts";
 import Features from "./components/Features";
 import Courseva from "./components/Courseva";
+import Pricing from "./components/Pricing";
 
 
 
@@ -22,6 +23,7 @@ function App(){
       <Facts/>
       <Features/>
       <Courseva/>
+      <Pricing/>
       
       
 

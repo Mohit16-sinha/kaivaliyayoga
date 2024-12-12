@@ -9,6 +9,9 @@ import Facts from "./components/Facts";
 import Features from "./components/Features";
 import Courseva from "./components/Courseva";
 import Pricing from "./components/Pricing";
+import Newsletter from "./components/Newsletter";
+import Contact from "./components/Contact";
+
 
 
 
@@ -24,6 +27,8 @@ function App(){
       <Features/>
       <Courseva/>
       <Pricing/>
+      <Newsletter/>
+      <Contact/>
       
       
 

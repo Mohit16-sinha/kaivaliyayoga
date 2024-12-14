@@ -1,31 +1,41 @@
-import React,{useState} from 'react';
+import React, { useState } from "react";
 
-//import menu
-import {BiMenu} from 'react-icons/bi';
+// Import menu icon
+import { BiMenu } from "react-icons/bi";
 
-//import data
-import{navigation} from '../data';
+// Import navigation data
+import { navigation } from "../data";
 
 const NavMobile = () => {
-  const[isOpen, setIsopen] = useState(false);
-  return <nav>
-  <div onClick= {()=> setIsopen(!isOpen)} className='cursor-pointer text-4xl text-heading ml-[10px] lg:hidden'>
-    <BiMenu/>
-  </div>
-  <ul className={`${isOpen ? 'max-h-60 p-8' : 'max-h-0 p-0'}flex flex-col absolute w-full bg-white top-24 left-0 shadow-primary space-y-6 overflow-hidden tranisition-all`}>
-   {navigation.map((item,index)=>{
-    return (
-     <li key={index}>
-      <a href={item.href}>{item.name}
-      </a>
-     </li>
-    );
-   })}
+  const [isOpen, setIsOpen] = useState(false);
 
-  </ul>
-  
+  return (
+    <nav className="lg:hidden relative">
+      {/* Menu Button */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
+        aria-controls="mobile-menu"
+        className="cursor-pointer text-4xl text-heading ml-[10px] focus:outline-none"
+      >
+        <BiMenu />
+      </button>
 
-  </nav>;
+      {/* Menu Items */}
+      <ul
+        id="mobile-menu"
+        className={`${
+          isOpen ? "max-h-60 p-6" : "max-h-0 p-0"
+        } flex flex-col absolute w-full bg-white top-16 left-0 shadow-md space-y-6 overflow-hidden transition-all duration-300`}
+      >
+        {navigation.map((item, index) => (
+          <li key={index} className="text-heading text-lg hover:text-orange-500 transition-colors">
+            <a href={item.href}>{item.name}</a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
 };
 
 export default NavMobile;

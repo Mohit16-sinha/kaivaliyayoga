@@ -11,6 +11,7 @@ import Courseva from "./components/Courseva";
 import Pricing from "./components/Pricing";
 import Newsletter from "./components/Newsletter";
 import Contact from "./components/Contact";
+import Footer from "./components/Footer";
 
 
 
@@ -29,6 +30,7 @@ function App(){
       <Pricing/>
       <Newsletter/>
       <Contact/>
+      <Footer/>
       
       
 

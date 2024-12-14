@@ -2,20 +2,20 @@ import React from "react";
 
 const Contact = () => {
   return (
-    <section className="section bg-gradient-to-r from-pink-500 via-pink-400 to-pink-300 py-12 relative">
+    <section className="section bg-gradient-to-r from-orange-400 via-orange-300 to-white py-12 relative">
       {/* Background Decoration */}
       <div className="absolute inset-0 z-0">
-        <div className="bg-gradient-to-br from-pink-400 to-white opacity-20 w-32 h-32 rounded-full blur-2xl absolute top-10 left-20"></div>
-        <div className="bg-gradient-to-br from-pink-400 to-white opacity-20 w-40 h-40 rounded-full blur-2xl absolute bottom-10 right-20"></div>
+        <div className="bg-gradient-to-br from-orange-500 to-white opacity-20 w-32 h-32 rounded-full blur-2xl absolute top-10 left-20"></div>
+        <div className="bg-gradient-to-br from-orange-500 to-white opacity-20 w-40 h-40 rounded-full blur-2xl absolute bottom-10 right-20"></div>
       </div>
 
       <div className="container mx-auto relative z-10">
         {/* Heading */}
         <div className="text-center mb-10">
-          <h2 className="text-4xl font-bold text-white animate-fadeIn">
+          <h2 className="text-4xl font-bold text-gray-800 animate-fadeIn">
             Contact Us
           </h2>
-          <p className="text-pink-100 mt-2 animate-fadeIn delay-200">
+          <p className="text-orange-600 mt-2 animate-fadeIn delay-200">
             Have questions? We’d love to hear from you. Reach out to us below!
           </p>
         </div>
@@ -35,7 +35,7 @@ const Contact = () => {
                 type="text"
                 id="name"
                 name="name"
-                className="form-input w-full border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-pink-400 focus:outline-none transition-all duration-300"
+                className="form-input w-full border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-orange-400 focus:outline-none transition-all duration-300"
                 placeholder="Enter your name"
                 required
               />
@@ -53,7 +53,7 @@ const Contact = () => {
                 type="email"
                 id="email"
                 name="email"
-                className="form-input w-full border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-pink-400 focus:outline-none transition-all duration-300"
+                className="form-input w-full border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-orange-400 focus:outline-none transition-all duration-300"
                 placeholder="Enter your email"
                 required
               />
@@ -70,7 +70,7 @@ const Contact = () => {
               <textarea
                 id="message"
                 name="message"
-                className="form-textarea w-full border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-pink-400 focus:outline-none transition-all duration-300"
+                className="form-textarea w-full border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-orange-400 focus:outline-none transition-all duration-300"
                 rows="5"
                 placeholder="Type your message here"
                 required
@@ -80,7 +80,7 @@ const Contact = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-pink-500 to-pink-400 text-white font-semibold py-3 rounded-md shadow-md hover:bg-pink-600 hover:scale-105 transition-transform duration-300"
+              className="w-full bg-gradient-to-r from-orange-500 to-orange-400 text-white font-semibold py-3 rounded-md shadow-md hover:scale-105 transition-transform duration-300"
             >
               Send Message
             </button>

@@ -1,70 +1,101 @@
-# Getting Started with Create React App
+# Kaivalya Yoga Studio Platform
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A full-stack web application for managing a yoga studio, featuring class scheduling, membership management, and a comprehensive admin dashboard.
 
-## Available Scripts
+## Tech Stack
 
-In the project directory, you can run:
+### Frontend
+- **React 18** (Vite)
+- **Tailwind CSS** for styling
+- **React Router** for navigation
+- **React Icons**
 
-### `npm start`
+### Backend
+- **Go** (Golang 1.25+)
+- **Gin Web Framework**
+- **GORM** (SQLite Database)
+- **JWT** Authentication
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+---
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 🚀 Getting Started
 
-### `npm test`
+### Prerequisites
+Ensure you have the following installed on your system:
+- [Go](https://go.dev/dl/) (version 1.25 or higher)
+- [Node.js](https://nodejs.org/) (version 18 or higher)
+- [Git](https://git-scm.com/downloads)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### 1. Clone the Repository
+Open your terminal (PowerShell, Command Prompt, or Terminal) and run:
 
-### `npm run build`
+```bash
+git clone https://github.com/YOUR_GITHUB_USERNAME/kaivaliyayoga.git
+cd kaivaliyayoga
+```
+*(Replace `YOUR_GITHUB_USERNAME` with the actual username where the repo is hosted)*
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### 2. Backend Setup
+The backend server runs on port `8080`.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+1.  Navigate to the server directory:
+    ```bash
+    cd server
+    ```
+2.  Install Go dependencies:
+    ```bash
+    go mod download
+    ```
+3.  Create a `.env` file in the `server/` directory (if not already present). You can copy the example or use these defaults:
+    ```env
+    PORT=8080
+    DB_NAME=yoga.db
+    JWT_SECRET=your_super_secret_key
+    ```
+4.  Run the server:
+    ```bash
+    go run .
+    ```
+    You should see: `Starting server... v6 on 8080`
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### 3. Frontend Setup
+The frontend runs on port `5173` (default Vite port).
 
-### `npm run eject`
+1.  Open a **new terminal** window (keep the backend running in the first one).
+2.  Navigate to the project root (if not already there):
+    ```bash
+    cd kaivaliyayoga
+    ```
+3.  Install dependencies:
+    ```bash
+    npm install
+    ```
+4.  Start the development server:
+    ```bash
+    npm run dev
+    ```
+5.  Open your browser and visit: `http://localhost:5173`
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+---
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## 🤝 For Collaborators
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+If you are a collaborator (e.g., checking this out on another system):
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+1.  **Get Access**: Ensure you have been added as a collaborator to the GitHub repository. You should receive an email invitation or see it in your GitHub notifications.
+2.  **Clone**: Follow the "Clone the Repository" step above.
+3.  **Branching**:
+    - Always create a new branch for your changes:
+      ```bash
+      git checkout -b feature/new-amazing-feature
+      ```
+4.  **Syncing**:
+    - Before starting work, always pull the latest changes:
+      ```bash
+      git pull origin main
+      ```
+5.  **Running Locally**: Follow the Backend and Frontend setup steps exactly as above. The database (`yoga.db`) is SQLite, so a local file will be created when you first run the backend.
 
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### Troubleshooting
+- **Port In Use**: If port 8080 is busy, check if another instance of the server is running.
+- **Database**: If you see DB errors, try deleting `yoga.db` in the `server/` folder and restarting the server (it will auto-migration and recreate it).

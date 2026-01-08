@@ -1,45 +1,40 @@
-import React from "react";
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
 
-import Hero from './components/Hero';
 import Header from './components/Header';
-import MyParallaxComponent from "./components/myParallaxcomponent";
-import NavMobile from "./components/NavMobile";
-import Cards from "./components/Cards";
-import Facts from "./components/Facts";
-import Features from "./components/Features";
-import Courseva from "./components/Courseva";
-import Pricing from "./components/Pricing";
-import Newsletter from "./components/Newsletter";
-import Contact from "./components/Contact";
-import Footer from "./components/Footer";
+import Announcement from './components/Announcement';
+import Home from './pages/Home';
+import About from './pages/About';
+import Services from './pages/Services';
+import Contact from './pages/Contact';
+import SignIn from './pages/SignIn';
+import SignUp from './pages/SignUp';
 
+import Dashboard from './pages/Dashboard';
+import Classes from './pages/Classes';
+import AdminClasses from './pages/AdminClasses';
+import AdminDashboard from './pages/AdminDashboard';
 
-
-
-function App(){
-  return(
-    <div>
-      <Header/>
-      <Hero/>
-      <MyParallaxComponent/>
-      <NavMobile/>
-      <Cards/>
-      <Facts/>
-      <Features/>
-      <Courseva/>
-      <Pricing/>
-      <Newsletter/>
-      <Contact/>
-      <Footer/>
-      
-      
-
-      
-      
+function App() {
+  return (
+    <div className='relative font-secondary text-earth-900 bg-earth-100 min-h-screen'>
+      <Announcement />
+      <Header />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/services" element={<Services />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/classes" element={<Classes />} />
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        {/* Admin Routes */}
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin/classes" element={<AdminClasses />} />
+      </Routes>
     </div>
   );
 }
 
 export default App;
-
-

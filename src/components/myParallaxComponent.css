@@ -5,7 +5,7 @@
   /* Styling Individual Parallax Sections */
   .parallax-section {
     display: flex;
-    align-items: top;
+    align-items: center;
     justify-content: top;
     height: 100px;
     position: right;

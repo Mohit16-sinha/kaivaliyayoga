@@ -1,69 +1,94 @@
-import React, { useState, useEffect } from "react";
-import Nav from "./Nav";
-import NavMobile from "./NavMobile";
-
-// Import logo
-import firstLogo from "../images2/kaivaliyayoga-logo-.png";
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import Nav from './Nav';
+import NavMobile from './NavMobile';
+import Logo from '../images2/kaivaliyayoga-logo-.png';
 
 const Header = () => {
-  const [header, setHeader] = useState(false);
-  const [navMobileVisible, setNavMobileVisible] = useState(false);
+  const [isActive, setIsActive] = useState(false);
 
-  // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
-      setHeader(window.scrollY > 36);
+      window.scrollY > 50 ? setIsActive(true) : setIsActive(false);
     };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
   return (
     <header
-      className={`fixed w-full z-50 transition-all duration-300 ${
-        header ? "bg-white text-black shadow-md top-0" : "bg-red-500 text-white top-9"
-      }`}
+      className={`${isActive ? 'bg-white/90 shadow-md py-4' : 'bg-transparent py-6'
+        } sticky top-0 w-full z-50 transition-all duration-300 backdrop-blur-sm`}
     >
-      <div className="container mx-auto flex items-center justify-between px-4 py-3 lg:py-5">
+      <div className='container mx-auto px-4 lg:px-0 flex items-center justify-between'>
         {/* Logo */}
-        <div className="flex items-center">
-          <a href="#">
-            <img src={firstLogo} alt="Logo" className="w-12 h-auto" />
-          </a>
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex ml-6">
-            <Nav />
-          </div>
+        <Link to='/'>
+          <img src={Logo} alt='Kaivaliya Yoga' className='h-12 w-auto' />
+        </Link>
+
+        {/* Desktop Nav */}
+        <div className='hidden lg:flex'>
+          <Nav />
         </div>
 
-        {/* Right Section */}
-        <div className="flex items-center gap-4">
-          {/* Sign-In and Sign-Up Buttons */}
-          <div className="hidden lg:flex gap-4">
-            <button className="text-gray-800 font-medium text-sm lg:text-base hover:text-yellow-500 transition">
-              Sign In
-            </button>
-            <button className="px-4 py-2 lg:px-6 bg-orange-100 border border-orange-300 text-orange-700 font-medium text-sm lg:text-base rounded-md hover:bg-orange-200 hover:text-white transition">
-              Sign Up
-            </button>
-          </div>
+        {/* buttons */}
+        <div className='hidden lg:flex gap-4 items-center'>
+          {(() => {
+            const userStr = localStorage.getItem('user');
+            let user = null;
+            try {
+              user = userStr ? JSON.parse(userStr) : null;
+            } catch (e) {
+              console.error('Invalid user data', e);
+              localStorage.removeItem('user');
+            }
 
-          {/* Mobile Menu Toggle */}
-          <button
-            onClick={() => setNavMobileVisible(!navMobileVisible)}
-            className="lg:hidden text-2xl"
-          >
-            ☰
-          </button>
+            if (user) {
+              return (
+                <div className="flex items-center gap-4">
+                  {user.role === 'admin' && (
+                    <Link to='/admin' className="text-earth-900 font-bold hover:text-accent transition-colors border-2 border-accent px-3 py-1 rounded-full">
+                      Admin Panel
+                    </Link>
+                  )}
+                  <Link to='/dashboard' className="text-earth-900 font-bold hover:text-accent transition-colors flex items-center gap-2">
+                    <span className="w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center text-sm">
+                      {user.name.charAt(0).toUpperCase()}
+                    </span>
+                    Hi, {user.name}
+                  </Link>
+                </div>
+              );
+            }
+
+            return (
+              <>
+                <Link to='/signin?role=admin' className='hidden md:block text-xs font-semibold text-gray-500 hover:text-indigo-600 mr-2 transition-colors uppercase tracking-wider'>
+                  Admin Login
+                </Link>
+                <Link to='/signin'>
+                  <button className='text-earth-900 font-medium text-base hover:text-accent transition-colors'>
+                    Sign In
+                  </button>
+                </Link>
+                <Link to='/signup'>
+                  <button className='px-6 py-2 bg-accent text-white font-medium text-base rounded-full hover:bg-accent-hover transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5'>
+                    Sign Up
+                  </button>
+                </Link>
+              </>
+            );
+          })()}
         </div>
-      </div>
 
-      {/* Mobile Navigation */}
-      {navMobileVisible && (
-        <div className="lg:hidden bg-white text-black absolute top-full left-0 w-full shadow-md">
+        {/* Mobile Nav */}
+        <div className='lg:hidden'>
           <NavMobile />
         </div>
-      )}
+      </div>
     </header>
   );
 };

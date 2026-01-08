@@ -1,23 +1,51 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# =====================
+# Node / Frontend
+# =====================
 
 # dependencies
-/node_modules
-/.pnp
-.pnp.js
+node_modules/
 
-# testing
-/coverage
+# build output (Vite / React)
+dist/
+build/
 
-# production
-/build
-
-# misc
-.DS_Store
+# env files
+.env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
+# logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+*.log
+
+# =====================
+# Editor / OS
+# =====================
+.vscode/
+.DS_Store
+
+# =====================
+# Personal / Backup
+# =====================
+src_backup/
+*-Anand.*
+tailwind.config-Anand.js
+package-Anand.json
+package-lock-Anand.json
+
+# =====================
+# Server (Go)
+# =====================
+server/.env
+server/yoga.db
+server/yoga.db-journal
+server/tmp/
+
+# =====================
+# Misc
+# =====================
+*.exe

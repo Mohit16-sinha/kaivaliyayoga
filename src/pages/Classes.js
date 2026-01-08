@@ -9,13 +9,15 @@ const Classes = () => {
     const [isProcessing, setIsProcessing] = useState(false);
     const navigate = useNavigate();
 
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
     useEffect(() => {
         fetchClasses();
     }, []);
 
     const fetchClasses = async () => {
         try {
-            const response = await fetch('http://localhost:8080/classes', { cache: 'no-store' });
+            const response = await fetch(`${API_URL}/classes`, { cache: 'no-store' });
             if (response.ok) {
                 const data = await response.json();
                 console.log("Classes Data:", data);
@@ -42,7 +44,7 @@ const Classes = () => {
 
         try {
             // 1. Validate Membership
-            const validateResponse = await fetch('http://localhost:8080/api/memberships/validate', {
+            const validateResponse = await fetch(`${API_URL}/api/memberships/validate`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
@@ -51,7 +53,7 @@ const Classes = () => {
             if (validateData.valid && validateData.can_book) {
                 // 2a. Direct Booking (Membership/Credits)
                 setBookingMessage('Booking using active plan...');
-                const bookingResponse = await fetch('http://localhost:8080/user/bookings', {
+                const bookingResponse = await fetch(`${API_URL}/user/bookings`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -84,7 +86,7 @@ const Classes = () => {
         setBookingMessage('Initializing Payment...');
         try {
             // Create Order
-            const orderResponse = await fetch('http://localhost:8080/api/payments/create-order', {
+            const orderResponse = await fetch(`${API_URL}/api/payments/create-order`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -107,7 +109,7 @@ const Classes = () => {
                 handler: async function (response) {
                     try {
                         setBookingMessage('Verifying Payment...');
-                        const verifyResponse = await fetch('http://localhost:8080/api/payments/verify', {
+                        const verifyResponse = await fetch(`${API_URL}/api/payments/verify`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -124,7 +126,7 @@ const Classes = () => {
                         const verifyData = await verifyResponse.json();
 
                         setBookingMessage('Confirming Booking...');
-                        const bookingResponse = await fetch('http://localhost:8080/user/bookings', {
+                        const bookingResponse = await fetch(`${API_URL}/user/bookings`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -225,7 +227,7 @@ const Classes = () => {
                 ))}
             </div>
 
-            {classes.length === 0 && !error && (
+            {(!classes || classes.length === 0) && !error && (
                 <div className="text-center text-gray-500">No classes scheduled at the moment.</div>
             )}
         </div>

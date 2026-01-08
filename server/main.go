@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -22,8 +23,13 @@ func main() {
 	}
 
 	// Initialize Database (SQLite for now)
+	// Initialize Database (SQLite)
+	dbPath := os.Getenv("DB_NAME")
+	if dbPath == "" {
+		dbPath = "yoga.db"
+	}
 	var err error
-	db, err = gorm.Open(sqlite.Open("yoga.db"), &gorm.Config{})
+	db, err = gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
 	}
@@ -53,6 +59,9 @@ func main() {
 			"message": "pong",
 			"status":  "Backend is running!",
 		})
+	})
+	r.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
 
 	// Auth Routes

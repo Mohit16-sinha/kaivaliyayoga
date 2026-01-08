@@ -1,0 +1,32 @@
+﻿FROM golang:1.25-alpine AS builder
+
+WORKDIR /app
+
+RUN apk add --no-cache gcc musl-dev sqlite-dev
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+
+RUN CGO_ENABLED=1 GOOS=linux go build -ldflags="-w -s" -a -installsuffix cgo -o main .
+
+FROM alpine:latest
+
+RUN apk --no-cache add ca-certificates sqlite-libs wget
+
+WORKDIR /root/
+
+COPY --from=builder /app/main .
+
+RUN mkdir -p /app/data
+
+RUN addgroup -g 1000 yoga && adduser -D -u 1000 -G yoga yoga && chown -R yoga:yoga /root /app
+
+USER yoga
+
+EXPOSE 8080
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 CMD wget --quiet --tries=1 --spider http://localhost:8080/health || exit 1
+
+CMD ["./main"]

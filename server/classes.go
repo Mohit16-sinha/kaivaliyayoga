@@ -42,7 +42,7 @@ func GetClasses(c *gin.Context) {
 		return
 	}
 
-	var response []ClassResponse
+	response := []ClassResponse{}
 	for _, cls := range classes {
 		var count int64
 		// Count only confirmed bookings

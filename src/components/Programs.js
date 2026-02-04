@@ -3,7 +3,8 @@ import { IoMdClose } from 'react-icons/io'; // Ensure react-icons is installed
 
 // Import local images
 import course1 from '../assets/img/coursepics/course-1.png';
-// import course2 from '../assets/img/coursepics/course-2.png'; // Unused
+import course2 from '../assets/img/coursepics/course-2.png';
+import course3 from '../assets/img/coursepics/course-3.png';
 import teacherTrainingImg from '../assets/img/coursepics/teacher-training.jpg';
 
 const programsData = [
@@ -22,7 +23,7 @@ const programsData = [
         shortDescription: 'Learn the art of effortless meditation. Reduce stress and find deep inner peace in minutes.',
         longDescription: 'Sahaj Samadhi is a natural, effortless system of meditation based on the use of a personal mantra. "Sahaj" means natural, and "Samadhi" means the state of deep rest. Unlike other methods that require concentration, this technique allows the conscious mind to settle deeply into the self, giving rest twice as deep as sleep. Regular practice reduces stress, increases energy, and brings clarity to the mind.',
         details: ['3-Day Workshop', 'Personal Mantra', 'Lifetime Support'],
-        image: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=2031',
+        image: course2,
         color: 'from-teal-200 to-teal-100',
         accent: 'text-teal-600',
         buttonColor: 'bg-teal-600 hover:bg-teal-700'
@@ -32,7 +33,7 @@ const programsData = [
         shortDescription: 'Deepen your practice and become a certified instructor. Share the gift of yoga with the world.',
         longDescription: 'Transform your life and career with our comprehensive 200-Hour Yoga Teacher Training (RYT-200). This immersive program covers advanced anatomy, teaching methodology, sequencing, and the business of yoga. You will not only refine your personal practice but also find your unique voice as a teacher. Upon graduation, you will be a Yoga Alliance certified instructor, ready to lead inspiring classes worldwide.',
         details: ['200 Hours (RYT)', 'Global Certification', 'Intensive Training'],
-        image: teacherTrainingImg,
+        image: course3,
         color: 'from-purple-200 to-purple-100',
         accent: 'text-purple-600',
         buttonColor: 'bg-purple-600 hover:bg-purple-700'

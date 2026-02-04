@@ -1,0 +1,21 @@
+FROM golang:1.25-alpine
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apk add --no-cache git gcc musl-dev sqlite-dev
+
+# Install Air for hot reloading
+RUN go install github.com/air-verse/air@latest
+
+# Copy go mod and sum files
+COPY go.mod go.sum ./
+
+# Download dependencies
+RUN go mod download
+
+# Copy source code
+COPY . .
+
+# Run Air using the configuration file
+CMD ["air", "-c", ".air.toml"]

@@ -4,17 +4,28 @@ services:
   backend:
     build:
       context: ./server
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: yoga-backend
     ports:
       - "8080:8080"
     environment:
       - PORT=8080
-      - DB_NAME=/app/yoga.db
+      - DB_DRIVER=postgres
+      - DB_HOST=db
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=yoga_wellness
+      - DB_PORT=5432
+      - MIGRATE_SQLITE=true
+      # Fallback to SQLite if needed, but we prefer PG now
+      # - DB_NAME=/app/yoga.db 
       - JWT_SECRET=your_super_secret_key_change_in_production
     volumes:
       - ./server:/app
       - yoga-db:/app/data
+    depends_on:
+      db:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - yoga-network
@@ -39,8 +50,30 @@ services:
     stdin_open: true
     tty: true
 
+  db:
+    image: postgres:15-alpine
+    container_name: yoga-db-pg
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=yoga_wellness
+    volumes:
+      - yoga-pg-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - yoga-network
+
 volumes:
   yoga-db:
+    driver: local
+  yoga-pg-data:
     driver: local
 
 networks:

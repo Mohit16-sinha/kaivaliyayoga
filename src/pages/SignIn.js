@@ -1,10 +1,12 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 const SignIn = () => {
     const [formData, setFormData] = React.useState({ email: '', password: '' });
     const [error, setError] = React.useState('');
     const [loading, setLoading] = React.useState(false);
+    const navigate = useNavigate();
 
     const location = useLocation();
     const searchParams = new URLSearchParams(location.search);
@@ -14,33 +16,30 @@ const SignIn = () => {
         setFormData({ ...formData, [e.target.id]: e.target.value });
     };
 
+    const { login } = useAuth(); // START MODIFICATION
+
     const handleLogin = async () => {
         setError('');
         setLoading(true);
         try {
-            const response = await fetch('http://localhost:8080/signin', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData),
-            });
-            const data = await response.json();
-
-            if (!response.ok) throw new Error(data.error || 'Login failed');
+            const user = await login(formData.email, formData.password);
 
             // Admin Check
-            if (isAdminLogin && data.user.role !== 'admin') {
+            if (isAdminLogin && user.role !== 'admin') {
                 throw new Error('Access Denied: You are not an administrator.');
             }
 
-            // Success
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('user', JSON.stringify(data.user));
-
             // Redirect based on login type
-            window.location.href = isAdminLogin ? '/admin' : '/';
+            if (isAdminLogin || user.role === 'admin' || user.user_type === 'admin') {
+                navigate('/admin');
+            } else if (user.role === 'professional' || user.user_type === 'professional') {
+                navigate('/professional-dashboard');
+            } else {
+                navigate('/dashboard');
+            }
 
         } catch (err) {
-            setError(err.message);
+            setError(err.response?.data?.error || err.message || 'Login failed');
         } finally {
             setLoading(false);
         }
@@ -127,6 +126,17 @@ const SignIn = () => {
                         </>
                     )}
                 </p>
+
+                {!isAdminLogin && (
+                    <div className="mt-6 pt-6 border-t border-earth-200 text-center">
+                        <Link
+                            to="/signin?role=admin"
+                            className="text-sm text-indigo-600 hover:text-indigo-800 font-medium"
+                        >
+                            🔐 Login as Administrator
+                        </Link>
+                    </div>
+                )}
             </div>
         </div>
     );

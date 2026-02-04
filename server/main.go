@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"kaivaliyayoga/internal/handlers"
 	"net/http"
 	"os"
 	"time"
@@ -10,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/glebarez/sqlite"
 	"github.com/joho/godotenv"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
@@ -22,20 +24,64 @@ func main() {
 		fmt.Println("No .env file found, using system env vars")
 	}
 
-	// Initialize Database (SQLite for now)
-	// Initialize Database (SQLite)
-	dbPath := os.Getenv("DB_NAME")
-	if dbPath == "" {
-		dbPath = "yoga.db"
-	}
+	// Initialize Database
 	var err error
-	db, err = gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
+	dbDriver := os.Getenv("DB_DRIVER")
+
+	if dbDriver == "postgres" {
+		dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=UTC",
+			os.Getenv("DB_HOST"),
+			os.Getenv("DB_USER"),
+			os.Getenv("DB_PASSWORD"),
+			os.Getenv("DB_NAME"),
+			os.Getenv("DB_PORT"),
+		)
+		fmt.Println("Connecting to PostgreSQL...")
+		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	} else {
+		// Fallback to SQLite
+		dbPath := os.Getenv("DB_NAME")
+		if dbPath == "" {
+			dbPath = "yoga.db"
+		}
+		fmt.Println("Connecting to SQLite...")
+		db, err = gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
+	}
+
 	if err != nil {
-		panic("failed to connect database")
+		panic("failed to connect database: " + err.Error())
 	}
 
 	// Migrate Schema
-	db.AutoMigrate(&User{}, &Contact{}, &Class{}, &Booking{}, &Payment{}, &Membership{}, &Program{}, &ProgramEnrollment{})
+	// Enhanced & New Models
+	err = db.AutoMigrate(
+		&User{},
+		&Contact{},
+		&Class{},
+		&Booking{},
+		&Payment{},
+		&Membership{},
+		&Program{},
+		&ProgramEnrollment{},
+		&PracticeSession{},
+		// Marketplace Models
+		&Professional{},
+		&ProfessionalCertification{},
+		&Service{},
+		&ProfessionalAvailability{},
+		&Appointment{},
+		&Review{},
+		&Message{},
+		&ProfessionalApplication{},
+	)
+	if err != nil {
+		fmt.Println("Migration Failed:", err)
+	}
+
+	// Data Migration Check
+	if os.Getenv("MIGRATE_SQLITE") == "true" {
+		MigrateFromSQLite(db)
+	}
 
 	// Seed Data
 	SeedPrograms()
@@ -145,8 +191,21 @@ func main() {
 			}
 
 			time.Sleep(1 * time.Hour) // Run every hour
+			time.Sleep(1 * time.Hour) // Run every hour
 		}
 	}()
+
+	// AI Practice Routes (Protected)
+	aiRoutes := r.Group("/api/ai-practice")
+	aiRoutes.Use(AuthMiddleware())
+	{
+		aiRoutes.POST("/sessions", SavePracticeSession)
+		aiRoutes.GET("/history", GetPracticeHistory)
+		aiRoutes.GET("/stats", GetPracticeStats)
+	}
+
+	// Currency Routes (Public)
+	r.GET("/api/exchange-rates", GetExchangeRates)
 
 	// Webhooks (Public)
 	// r.POST("/api/payments/webhook", WebhookHandler) // Implement later if needed
@@ -178,6 +237,14 @@ func main() {
 
 	// Contact Routes
 	r.POST("/contact", SubmitContact)
+
+	// Professional Application Routes (Public)
+	r.POST("/api/apply/professional", handlers.SubmitApplication)
+
+	// Admin Application Management
+	adminRoutes.GET("/applications", handlers.GetApplications)
+	adminRoutes.POST("/applications/:id/approve", handlers.ApproveApplication)
+	adminRoutes.POST("/applications/:id/reject", handlers.RejectApplication)
 
 	r.GET("/debug", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "I am the new server"})

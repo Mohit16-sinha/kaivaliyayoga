@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import PriceDisplay from '../components/PriceDisplay';
+import { BASE_PRICES_AUD } from '../config/currencies';
 
 const Classes = () => {
     const [classes, setClasses] = useState([]);
@@ -83,81 +85,9 @@ const Classes = () => {
     };
 
     const initiatePayment = async (classId, token) => {
-        setBookingMessage('Initializing Payment...');
-        try {
-            // Create Order
-            const orderResponse = await fetch(`${API_URL}/api/payments/create-order`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ amount: 500, currency: "INR" })
-            });
-
-            if (!orderResponse.ok) throw new Error('Failed to create order');
-            const orderData = await orderResponse.json();
-
-            // Open Razorpay
-            const options = {
-                key: orderData.key_id,
-                amount: orderData.amount,
-                currency: orderData.currency,
-                name: "Kaivaliya Yoga",
-                description: "Class Booking",
-                order_id: orderData.order_id,
-                handler: async function (response) {
-                    try {
-                        setBookingMessage('Verifying Payment...');
-                        const verifyResponse = await fetch(`${API_URL}/api/payments/verify`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${token}`
-                            },
-                            body: JSON.stringify({
-                                order_id: orderData.order_id,
-                                razorpay_payment_id: response.razorpay_payment_id,
-                                razorpay_signature: response.razorpay_signature
-                            })
-                        });
-
-                        if (!verifyResponse.ok) throw new Error('Payment verification failed');
-                        const verifyData = await verifyResponse.json();
-
-                        setBookingMessage('Confirming Booking...');
-                        const bookingResponse = await fetch(`${API_URL}/user/bookings`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${token}`
-                            },
-                            body: JSON.stringify({
-                                class_id: classId,
-                                payment_id: verifyData.payment_id
-                            })
-                        });
-
-                        if (bookingResponse.ok) {
-                            setBookingMessage('Booking Confirmed! See you in class.');
-                            setTimeout(() => navigate('/dashboard'), 2000);
-                        } else {
-                            throw new Error('Booking failed after payment');
-                        }
-
-                    } catch (err) {
-                        setBookingMessage(`Error: ${err.message}`);
-                    }
-                },
-                theme: { color: "#3399cc" }
-            };
-
-            const rzp = new window.Razorpay(options);
-            rzp.open();
-
-        } catch (err) {
-            setBookingMessage(`Error: ${err.message}`);
-        }
+        alert("Online payments for single classes are temporarily paused while we upgrade our multi-currency system. Please purchase a membership or contact us.");
+        setIsProcessing(false);
+        setBookingMessage('');
     };
 
     if (loading) return <div className="text-center py-10">Loading classes...</div>;
@@ -209,7 +139,9 @@ const Classes = () => {
                             </div>
                             <div className="flex justify-between border-t pt-2 mt-2">
                                 <span>Price:</span>
-                                <span className="font-bold text-green-700">₹500</span>
+                                <span className="font-bold text-green-700">
+                                    <PriceDisplay amountAUD={BASE_PRICES_AUD.drop_in} />
+                                </span>
                             </div>
                         </div>
 
@@ -221,7 +153,7 @@ const Classes = () => {
                                 : 'bg-indigo-600 hover:bg-indigo-700'
                                 }`}
                         >
-                            {isProcessing ? 'Processing...' : (cls.is_full ? 'Class Full' : 'Book Now (₹500)')}
+                            {isProcessing ? 'Processing...' : (cls.is_full ? 'Class Full' : 'Book Now')}
                         </button>
                     </div>
                 ))}

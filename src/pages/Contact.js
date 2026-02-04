@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaMapMarkerAlt, FaPhoneAlt, FaEnvelope, FaInstagram, FaFacebook, FaYoutube, FaWhatsapp } from 'react-icons/fa'; // Ensure react-icons
+import { FaMapMarkerAlt, FaPhoneAlt, FaEnvelope, FaInstagram, FaFacebook, FaYoutube, FaWhatsapp } from 'react-icons/fa';
 
 const Contact = () => {
     const [formData, setFormData] = React.useState({
@@ -9,7 +9,7 @@ const Contact = () => {
         subject: 'General Inquiry',
         message: ''
     });
-    const [submitStatus, setSubmitStatus] = React.useState(null); // null, 'success', 'error'
+    const [submitStatus, setSubmitStatus] = React.useState(null);
     const [errorMessage, setErrorMessage] = React.useState('');
     const [isSubmitting, setIsSubmitting] = React.useState(false);
 
@@ -55,12 +55,12 @@ const Contact = () => {
     };
 
     return (
-        <div className='pt-24 pb-12'>
+        <div className='pt-24 pb-12 bg-white dark:bg-earth-900 transition-colors duration-300 min-h-screen'>
 
             {/* HERO */}
             <section className='container mx-auto px-4 mb-16 text-center'>
-                <h1 className='text-5xl lg:text-7xl font-primary font-bold text-earth-900 mb-6'>Let's Connect</h1>
-                <p className='text-xl text-gray-600 max-w-2xl mx-auto'>
+                <h1 className='text-5xl lg:text-7xl font-primary font-bold text-earth-900 dark:text-white mb-6 transition-colors'>Let's Connect</h1>
+                <p className='text-xl text-gray-600 dark:text-earth-300 max-w-2xl mx-auto transition-colors'>
                     We'd love to hear from you. Whether you have a question about classes, teacher training, or just want to say hello.
                 </p>
             </section>
@@ -69,13 +69,12 @@ const Contact = () => {
             <section className='container mx-auto px-4 mb-20'>
                 <div className='grid grid-cols-1 md:grid-cols-3 gap-8'>
                     {/* Visit Us */}
-                    {/* Visit Us */}
-                    <div className='bg-white p-8 rounded-2xl shadow-lg border-b-4 border-earth-900 text-center hover:-translate-y-2 transition-transform duration-300'>
-                        <div className='w-16 h-16 bg-earth-100 rounded-full flex items-center justify-center mx-auto mb-6 text-earth-900 text-2xl'>
+                    <div className='bg-white dark:bg-earth-800 p-8 rounded-2xl shadow-lg border-b-4 border-earth-900 dark:border-earth-600 text-center hover:-translate-y-2 transition-all duration-300'>
+                        <div className='w-16 h-16 bg-earth-100 dark:bg-earth-700 rounded-full flex items-center justify-center mx-auto mb-6 text-earth-900 dark:text-earth-200 text-2xl'>
                             <FaMapMarkerAlt />
                         </div>
-                        <h3 className='text-xl font-bold mb-4 font-primary'>Visit Us</h3>
-                        <p className='text-gray-600 mb-6'>
+                        <h3 className='text-xl font-bold mb-4 font-primary text-earth-900 dark:text-white'>Visit Us</h3>
+                        <p className='text-gray-600 dark:text-earth-300 mb-6'>
                             123 Yoga Street, <br />
                             Wellness District, <br />
                             New Delhi - 110001
@@ -86,39 +85,37 @@ const Contact = () => {
                             rel="noopener noreferrer"
                             className='inline-block w-full'
                         >
-                            <button className='text-accent font-bold uppercase text-sm tracking-wider hover:text-earth-900 transition-colors w-full'>Get Directions &rarr;</button>
+                            <button className='text-accent font-bold uppercase text-sm tracking-wider hover:text-earth-900 dark:hover:text-earth-200 transition-colors w-full'>Get Directions &rarr;</button>
                         </a>
                     </div>
 
                     {/* Call Us */}
-                    {/* Call Us */}
-                    <div className='bg-white p-8 rounded-2xl shadow-lg border-b-4 border-accent text-center hover:-translate-y-2 transition-transform duration-300'>
-                        <div className='w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6 text-accent text-2xl'>
+                    <div className='bg-white dark:bg-earth-800 p-8 rounded-2xl shadow-lg border-b-4 border-accent text-center hover:-translate-y-2 transition-all duration-300'>
+                        <div className='w-16 h-16 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center mx-auto mb-6 text-accent text-2xl'>
                             <FaPhoneAlt />
                         </div>
-                        <h3 className='text-xl font-bold mb-4 font-primary'>Call Us</h3>
-                        <p className='text-gray-600 mb-6'>
+                        <h3 className='text-xl font-bold mb-4 font-primary text-earth-900 dark:text-white'>Call Us</h3>
+                        <p className='text-gray-600 dark:text-earth-300 mb-6'>
                             Mon - Sat: 9AM - 8PM <br />
-                            <span className='font-bold text-lg block mt-2'>+91 98765 43210</span>
+                            <span className='font-bold text-lg block mt-2 text-earth-900 dark:text-white'>+91 98765 43210</span>
                         </p>
                         <a href="tel:+919876543210" className='inline-block w-full'>
-                            <button className='text-accent font-bold uppercase text-sm tracking-wider hover:text-earth-900 transition-colors w-full'>Call Now &rarr;</button>
+                            <button className='text-accent font-bold uppercase text-sm tracking-wider hover:text-earth-900 dark:hover:text-earth-200 transition-colors w-full'>Call Now &rarr;</button>
                         </a>
                     </div>
 
                     {/* Email Us */}
-                    {/* Email Us */}
-                    <div className='bg-white p-8 rounded-2xl shadow-lg border-b-4 border-earth-900 text-center hover:-translate-y-2 transition-transform duration-300'>
-                        <div className='w-16 h-16 bg-earth-100 rounded-full flex items-center justify-center mx-auto mb-6 text-earth-900 text-2xl'>
+                    <div className='bg-white dark:bg-earth-800 p-8 rounded-2xl shadow-lg border-b-4 border-earth-900 dark:border-earth-600 text-center hover:-translate-y-2 transition-all duration-300'>
+                        <div className='w-16 h-16 bg-earth-100 dark:bg-earth-700 rounded-full flex items-center justify-center mx-auto mb-6 text-earth-900 dark:text-earth-200 text-2xl'>
                             <FaEnvelope />
                         </div>
-                        <h3 className='text-xl font-bold mb-4 font-primary'>Email Us</h3>
-                        <p className='text-gray-600 mb-6'>
+                        <h3 className='text-xl font-bold mb-4 font-primary text-earth-900 dark:text-white'>Email Us</h3>
+                        <p className='text-gray-600 dark:text-earth-300 mb-6'>
                             General: hello@kaivaliya.com <br />
                             Support: help@kaivaliya.com
                         </p>
                         <a href="mailto:hello@kaivaliya.com" className='inline-block w-full'>
-                            <button className='text-accent font-bold uppercase text-sm tracking-wider hover:text-earth-900 transition-colors w-full'>Send Email &rarr;</button>
+                            <button className='text-accent font-bold uppercase text-sm tracking-wider hover:text-earth-900 dark:hover:text-earth-200 transition-colors w-full'>Send Email &rarr;</button>
                         </a>
                     </div>
                 </div>
@@ -129,15 +126,15 @@ const Contact = () => {
                 <div className='flex flex-col lg:flex-row gap-12'>
 
                     {/* Contact Form */}
-                    <div className='lg:w-1/2 bg-white p-8 md:p-12 rounded-3xl shadow-xl'>
-                        <h2 className='text-3xl font-primary font-bold text-earth-900 mb-8'>Send a Message</h2>
+                    <div className='lg:w-1/2 bg-white dark:bg-earth-800 p-8 md:p-12 rounded-3xl shadow-xl transition-colors'>
+                        <h2 className='text-3xl font-primary font-bold text-earth-900 dark:text-white mb-8'>Send a Message</h2>
                         {submitStatus === 'success' && (
-                            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6 text-center">
+                            <div className="bg-green-100 dark:bg-green-900/30 border border-green-400 dark:border-green-700 text-green-700 dark:text-green-300 px-4 py-3 rounded mb-6 text-center">
                                 Message sent successfully! We will get back to you soon.
                             </div>
                         )}
                         {submitStatus === 'error' && (
-                            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6 text-center">
+                            <div className="bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-3 rounded mb-6 text-center">
                                 {errorMessage || 'Failed to send message. Please try again.'}
                             </div>
                         )}
@@ -145,48 +142,48 @@ const Contact = () => {
                         <form className='space-y-6' onSubmit={handleSubmit}>
                             <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
                                 <div>
-                                    <label className='block text-gray-700 font-bold mb-2 text-sm uppercase tracking-wide'>Name</label>
+                                    <label className='block text-gray-700 dark:text-earth-200 font-bold mb-2 text-sm uppercase tracking-wide'>Name</label>
                                     <input
                                         type='text'
                                         name='name'
                                         value={formData.name}
                                         onChange={handleChange}
                                         required
-                                        className='w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-accent focus:bg-white focus:outline-none transition-colors'
+                                        className='w-full px-4 py-3 rounded-lg bg-gray-50 dark:bg-earth-700 border border-gray-200 dark:border-earth-600 text-earth-900 dark:text-white focus:border-accent focus:bg-white dark:focus:bg-earth-600 focus:outline-none transition-colors'
                                         placeholder='John Doe'
                                     />
                                 </div>
                                 <div>
-                                    <label className='block text-gray-700 font-bold mb-2 text-sm uppercase tracking-wide'>Email</label>
+                                    <label className='block text-gray-700 dark:text-earth-200 font-bold mb-2 text-sm uppercase tracking-wide'>Email</label>
                                     <input
                                         type='email'
                                         name='email'
                                         value={formData.email}
                                         onChange={handleChange}
                                         required
-                                        className='w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-accent focus:bg-white focus:outline-none transition-colors'
+                                        className='w-full px-4 py-3 rounded-lg bg-gray-50 dark:bg-earth-700 border border-gray-200 dark:border-earth-600 text-earth-900 dark:text-white focus:border-accent focus:bg-white dark:focus:bg-earth-600 focus:outline-none transition-colors'
                                         placeholder='john@example.com'
                                     />
                                 </div>
                             </div>
                             <div>
-                                <label className='block text-gray-700 font-bold mb-2 text-sm uppercase tracking-wide'>Phone</label>
+                                <label className='block text-gray-700 dark:text-earth-200 font-bold mb-2 text-sm uppercase tracking-wide'>Phone</label>
                                 <input
                                     type='tel'
                                     name='phone'
                                     value={formData.phone}
                                     onChange={handleChange}
-                                    className='w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-accent focus:bg-white focus:outline-none transition-colors'
+                                    className='w-full px-4 py-3 rounded-lg bg-gray-50 dark:bg-earth-700 border border-gray-200 dark:border-earth-600 text-earth-900 dark:text-white focus:border-accent focus:bg-white dark:focus:bg-earth-600 focus:outline-none transition-colors'
                                     placeholder='+91 98765 43210'
                                 />
                             </div>
                             <div>
-                                <label className='block text-gray-700 font-bold mb-2 text-sm uppercase tracking-wide'>Subject</label>
+                                <label className='block text-gray-700 dark:text-earth-200 font-bold mb-2 text-sm uppercase tracking-wide'>Subject</label>
                                 <select
                                     name='subject'
                                     value={formData.subject}
                                     onChange={handleChange}
-                                    className='w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-accent focus:bg-white focus:outline-none transition-colors'
+                                    className='w-full px-4 py-3 rounded-lg bg-gray-50 dark:bg-earth-700 border border-gray-200 dark:border-earth-600 text-earth-900 dark:text-white focus:border-accent focus:bg-white dark:focus:bg-earth-600 focus:outline-none transition-colors'
                                 >
                                     <option>General Inquiry</option>
                                     <option>Class Registration</option>
@@ -196,13 +193,13 @@ const Contact = () => {
                                 </select>
                             </div>
                             <div>
-                                <label className='block text-gray-700 font-bold mb-2 text-sm uppercase tracking-wide'>Message</label>
+                                <label className='block text-gray-700 dark:text-earth-200 font-bold mb-2 text-sm uppercase tracking-wide'>Message</label>
                                 <textarea
                                     name='message'
                                     value={formData.message}
                                     onChange={handleChange}
                                     required
-                                    className='w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-accent focus:bg-white focus:outline-none transition-colors h-32'
+                                    className='w-full px-4 py-3 rounded-lg bg-gray-50 dark:bg-earth-700 border border-gray-200 dark:border-earth-600 text-earth-900 dark:text-white focus:border-accent focus:bg-white dark:focus:bg-earth-600 focus:outline-none transition-colors h-32'
                                     placeholder='How can we help you?'
                                 ></textarea>
                             </div>
@@ -213,7 +210,7 @@ const Contact = () => {
                             >
                                 {isSubmitting ? 'Sending...' : 'Send Message'}
                             </button>
-                            <p className='text-center text-gray-500 text-sm mt-4'>We typically respond within 4 hours.</p>
+                            <p className='text-center text-gray-500 dark:text-earth-400 text-sm mt-4'>We typically respond within 4 hours.</p>
                         </form>
                     </div>
 
@@ -252,13 +249,13 @@ const Contact = () => {
                         </div>
 
                         {/* Socials */}
-                        <div className='bg-white p-8 rounded-3xl shadow-lg border border-gray-100 text-center'>
-                            <h4 className='font-bold text-earth-900 mb-6'>Follow our daily inspiration</h4>
+                        <div className='bg-white dark:bg-earth-800 p-8 rounded-3xl shadow-lg border border-gray-100 dark:border-earth-700 text-center transition-colors'>
+                            <h4 className='font-bold text-earth-900 dark:text-white mb-6'>Follow our daily inspiration</h4>
                             <div className='flex justify-center gap-6'>
-                                <a href='https://instagram.com' target='_blank' rel='noopener noreferrer' className='bg-earth-100 p-4 rounded-full text-earth-900 hover:bg-accent hover:text-white transition-all text-xl'><FaInstagram /></a>
-                                <a href='https://facebook.com' target='_blank' rel='noopener noreferrer' className='bg-earth-100 p-4 rounded-full text-earth-900 hover:bg-blue-600 hover:text-white transition-all text-xl'><FaFacebook /></a>
-                                <a href='https://youtube.com' target='_blank' rel='noopener noreferrer' className='bg-earth-100 p-4 rounded-full text-earth-900 hover:bg-red-600 hover:text-white transition-all text-xl'><FaYoutube /></a>
-                                <a href='https://whatsapp.com' target='_blank' rel='noopener noreferrer' className='bg-earth-100 p-4 rounded-full text-earth-900 hover:bg-green-500 hover:text-white transition-all text-xl'><FaWhatsapp /></a>
+                                <a href='https://instagram.com' target='_blank' rel='noopener noreferrer' className='bg-earth-100 dark:bg-earth-700 p-4 rounded-full text-earth-900 dark:text-earth-200 hover:bg-accent hover:text-white transition-all text-xl'><FaInstagram /></a>
+                                <a href='https://facebook.com' target='_blank' rel='noopener noreferrer' className='bg-earth-100 dark:bg-earth-700 p-4 rounded-full text-earth-900 dark:text-earth-200 hover:bg-blue-600 hover:text-white transition-all text-xl'><FaFacebook /></a>
+                                <a href='https://youtube.com' target='_blank' rel='noopener noreferrer' className='bg-earth-100 dark:bg-earth-700 p-4 rounded-full text-earth-900 dark:text-earth-200 hover:bg-red-600 hover:text-white transition-all text-xl'><FaYoutube /></a>
+                                <a href='https://whatsapp.com' target='_blank' rel='noopener noreferrer' className='bg-earth-100 dark:bg-earth-700 p-4 rounded-full text-earth-900 dark:text-earth-200 hover:bg-green-500 hover:text-white transition-all text-xl'><FaWhatsapp /></a>
                             </div>
                         </div>
 

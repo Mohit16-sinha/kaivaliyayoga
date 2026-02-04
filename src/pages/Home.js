@@ -7,6 +7,7 @@ import Newsletter from '../components/Newsletter';
 import Stats from '../components/Stats';
 import Testimonials from '../components/Testimonials';
 import TeacherSpotlight from '../components/TeacherSpotlight';
+import Pricing from '../components/Pricing';
 
 const Home = () => {
     return (
@@ -16,6 +17,7 @@ const Home = () => {
             <Cards />
             <Programs />
             <Stats />
+            <Pricing />
             <Testimonials />
             <TeacherSpotlight />
             <Newsletter />

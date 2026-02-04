@@ -1,5 +1,6 @@
 import React from 'react';
-import HeroImage from '../images2/img6.jpg.jpg';
+import { Link } from 'react-router-dom';
+import HeroImage from '../assets/img/cards/kaylee-garrett-GaprWyIw66o-unsplash.jpg';
 
 const Hero = () => {
   return (
@@ -20,12 +21,12 @@ const Hero = () => {
           Find balance, strength, and serenity in every breath.
         </p>
         <div className="flex flex-col md:flex-row gap-4 justify-center">
-          <button className="px-8 py-3 bg-accent text-white font-semibold rounded-full hover:bg-accent-hover transition-all transform hover:scale-105 shadow-lg">
+          <Link to="/signup" className="px-8 py-3 bg-accent text-white font-semibold rounded-full hover:bg-accent-hover transition-all transform hover:scale-105 shadow-lg inline-block">
             Get Started
-          </button>
-          <button className="px-8 py-3 bg-white/20 backdrop-blur-md border border-white/50 text-white font-semibold rounded-full hover:bg-white/30 transition-all transform hover:scale-105 shadow-lg">
+          </Link>
+          <Link to="/about" className="px-8 py-3 bg-white/20 backdrop-blur-md border border-white/50 text-white font-semibold rounded-full hover:bg-white/30 transition-all transform hover:scale-105 shadow-lg inline-block">
             Learn More
-          </button>
+          </Link>
         </div>
       </div>
     </section>

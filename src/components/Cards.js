@@ -1,9 +1,9 @@
 import React from 'react';
 
 // Import images
-import card1 from '../assets/img/cards/card-1.png';
-import card2 from '../assets/img/cards/card-2.png';
-import card3 from '../assets/img/cards/card-3.png';
+import card1 from '../assets/img/cards/pexels-cedric-fauntleroy-7220623.jpg';
+import card2 from '../assets/img/cards/samantha-borges-gXsJ9Ywb5as-unsplash.jpg';
+import card3 from '../assets/img/cards/vitaly-gariev-JyPAY9-WNE8-unsplash.jpg';
 import bg from '../assets/img/cards/bg (1).png';
 
 const Cards = () => {

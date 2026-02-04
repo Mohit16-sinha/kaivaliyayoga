@@ -1,10 +1,20 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 const SignUp = () => {
     const [formData, setFormData] = React.useState({ name: '', email: '', password: '', phone: '' });
     const [error, setError] = React.useState('');
     const [loading, setLoading] = React.useState(false);
+    const { signup } = useAuth();
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    // Check if signing up as a professional
+    const searchParams = new URLSearchParams(location.search);
+    const isProfessional = searchParams.get('type') === 'professional';
+
+    const [termsAccepted, setTermsAccepted] = React.useState(false);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -15,24 +25,40 @@ const SignUp = () => {
         setLoading(true);
         try {
             // Basic validation
-            if (!formData.name || !formData.email || !formData.password) {
+            if (!formData.name || !formData.email || !formData.password || !formData.phone) {
                 throw new Error("Please fill in all required fields.");
             }
 
-            const response = await fetch('http://localhost:8080/signup', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData),
-            });
-            const data = await response.json();
+            // Phone Validation (Numeric only, 10-15 digits)
+            const phoneRegex = /^\d{10,15}$/;
+            if (!phoneRegex.test(formData.phone.replace(/[^0-9]/g, ''))) {
+                throw new Error("Phone number must contain 10 to 15 digits.");
+            }
 
-            if (!response.ok) throw new Error(data.error || 'Signup failed');
+            // Terms Validation
+            if (!termsAccepted) {
+                throw new Error("You must accept the Terms & Conditions to proceed.");
+            }
+
+            // Clean phone number (remove non-digits for backend)
+            const cleanPhone = formData.phone.replace(/[^0-9]/g, '');
+
+            // Construct payload with role/type
+            const payload = {
+                ...formData,
+                phone: cleanPhone,
+                role: isProfessional ? 'professional' : 'client',
+                user_type: isProfessional ? 'professional' : 'client'
+            };
+
+            await signup(payload);
 
             alert('Account created! Please Sign In.');
-            window.location.href = '/signin';
+            // Preserve the type param if redirecting back to signin (optional, but helpful if we add auto-fill there)
+            navigate('/signin');
 
         } catch (err) {
-            setError(err.message);
+            setError(err.response?.data?.error || err.message || 'Signup failed');
         } finally {
             setLoading(false);
         }
@@ -42,10 +68,10 @@ const SignUp = () => {
         <div className='min-h-screen pt-32 pb-12 flex items-center justify-center container mx-auto px-4'>
             <div className='bg-white p-8 lg:p-12 rounded-lg shadow-2xl max-w-md w-full border border-earth-200'>
                 <h2 className='text-3xl font-bold mb-6 text-center text-earth-900 font-primary'>
-                    Create Account
+                    {isProfessional ? 'Join as Professional' : 'Create Account'}
                 </h2>
                 <p className='text-center text-gray-600 mb-8 font-light'>
-                    Join our community of mindfulness
+                    {isProfessional ? 'Expand your practice with Kaivalya' : 'Join our community of mindfulness'}
                 </p>
 
                 {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-center">{error}</div>}
@@ -96,7 +122,7 @@ const SignUp = () => {
                             className='appearance-none border border-earth-300 rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:border-accent transition-colors'
                             id='phone'
                             type='tel'
-                            placeholder='+1 (555) 000-0000'
+                            placeholder='e.g., 9876543210'
                             value={formData.phone}
                             onChange={handleChange}
                         />
@@ -125,6 +151,8 @@ const SignUp = () => {
                         <input
                             id='terms'
                             type='checkbox'
+                            checked={termsAccepted}
+                            onChange={(e) => setTermsAccepted(e.target.checked)}
                             className='h-4 w-4 text-accent focus:ring-accent border-gray-300 rounded'
                         />
                         <label htmlFor='terms' className='ml-2 block text-sm text-gray-900'>

@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { IoMdCheckmark } from 'react-icons/io'; // Ensure react-icons installed
+import { IoMdCheckmark } from 'react-icons/io';
+import { useCurrency } from '../context/CurrencyContext';
+import PriceDisplay from '../components/PriceDisplay';
+import Pricing from '../components/Pricing';
+import { BASE_PRICES_AUD } from '../config/currencies';
 
 // Images
 import course1 from '../assets/img/coursepics/course-1.png';
@@ -130,7 +134,7 @@ const Services = () => {
             level: 'Beginner Friendly',
             description: 'A comprehensive introduction to Hatha Yoga. Master the basics, improve flexibility, and build a sustainable practice.',
             features: ['2 Classes per week', 'Personal Assessment', 'Course Material', 'Certificate'],
-            price: '₹8,000',
+            audPrice: BASE_PRICES_AUD.foundation,
             image: course1,
             reverse: false
         },
@@ -140,7 +144,7 @@ const Services = () => {
             level: 'All Levels',
             description: 'Discover the power of your breath and mind. This workshop teaches you an effortless meditation technique for life.',
             features: ['Personal Mantra', 'Stress Management Tools', 'Lifetime Access to Weekly Follow-ups'],
-            price: '₹5,000',
+            audPrice: BASE_PRICES_AUD.meditation,
             image: sahajImg,
             reverse: true
         },
@@ -150,7 +154,7 @@ const Services = () => {
             level: 'Intermediate',
             description: 'Take your practice to a professional level. Learn anatomy, philosophy, and the art of teaching yoga.',
             features: ['Yoga Alliance Certification', 'Teaching Methodology', 'In-depth Anatomy', 'Career Guidance'],
-            price: '₹45,000',
+            audPrice: BASE_PRICES_AUD.teacher_training,
             image: teacherTrainingImg,
             reverse: false
         }
@@ -344,7 +348,9 @@ const Services = () => {
                                         <div className='flex flex-col gap-4'>
                                             <div className="text-sm font-semibold text-gray-400 animate-pulse">Checking availability...</div>
                                             <div className='flex items-center gap-6'>
-                                                <span className='text-3xl font-bold text-accent'>{prog.price}</span>
+                                                <div className='text-3xl font-bold text-accent'>
+                                                    <PriceDisplay amountAUD={prog.audPrice} />
+                                                </div>
                                                 <button disabled className='bg-gray-200 text-gray-400 px-8 py-3 rounded-full font-bold cursor-wait'>
                                                     Please Wait...
                                                 </button>
@@ -367,9 +373,11 @@ const Services = () => {
                                         </div>
 
                                         <div className='flex items-center gap-6'>
-                                            <span className='text-3xl font-bold text-accent'>{prog.price}</span>
+                                            <div className='text-3xl font-bold text-accent'>
+                                                <PriceDisplay amountAUD={prog.audPrice} />
+                                            </div>
                                             <button
-                                                onClick={() => handleEnroll(prog.title, prog.price)}
+                                                onClick={() => alert("Registration for this program is temporarily paused while we upgrade our systems. Please contact us.")}
                                                 disabled={isFull}
                                                 className={`px-8 py-3 rounded-full font-bold transition-colors ${isFull
                                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
@@ -446,45 +454,7 @@ const Services = () => {
             </section>
 
             {/* PRICING */}
-            <section className='container mx-auto px-4 mb-24'>
-                <div className='text-center mb-16'>
-                    <h2 className='text-4xl font-primary font-bold text-earth-900 mb-4'>Simple Pricing</h2>
-                    <p className='text-gray-600'>No hidden fees. Choose the plan that fits your lifestyle.</p>
-                </div>
-
-                <div className='grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto'>
-                    {pricing.map((plan, idx) => (
-                        <div key={idx} className={`relative p-8 rounded-3xl ${plan.highlight ? 'bg-earth-900 text-white shadow-2xl scale-105 z-10' : 'bg-white text-earth-900 border border-gray-100 shadow-lg'}`}>
-                            {plan.highlight && (
-                                <div className='absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-accent text-white px-4 py-1 rounded-full text-sm font-bold uppercase tracking-wide'>
-                                    Most Popular
-                                </div>
-                            )}
-                            <h3 className={`text-xl font-bold mb-2 ${plan.highlight ? 'text-earth-200' : 'text-gray-500'}`}>{plan.title}</h3>
-                            <div className='flex items-baseline mb-8'>
-                                <span className='text-4xl font-bold'>{plan.price}</span>
-                                <span className={`ml-2 text-sm ${plan.highlight ? 'text-gray-300' : 'text-gray-500'}`}>{plan.period}</span>
-                            </div>
-                            <ul className='space-y-4 mb-10 text-left'>
-                                {plan.features.map((feat, i) => (
-                                    <li key={i} className='flex items-start gap-3'>
-                                        <IoMdCheckmark className={`mt-1 flex-shrink-0 ${plan.highlight ? 'text-accent' : 'text-green-500'}`} />
-                                        <span className={`text-sm ${plan.highlight ? 'text-gray-300' : 'text-gray-600'}`}>{feat}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                            <button
-                                onClick={() => handlePlanPurchase(plan.title, plan.price)}
-                                className={`w-full py-4 rounded-xl font-bold transition-all ${plan.highlight
-                                    ? 'bg-accent text-white hover:bg-white hover:text-earth-900'
-                                    : 'bg-earth-100 text-earth-900 hover:bg-earth-900 hover:text-white'
-                                    }`}>
-                                Choose Plan
-                            </button>
-                        </div>
-                    ))}
-                </div>
-            </section>
+            <Pricing />
 
             {/* FAQ */}
             <section className='container mx-auto px-4 mb-12 max-w-3xl'>

@@ -11,6 +11,12 @@ export default defineConfig({
             usePolling: true
         }
     },
+    test: {
+        globals: true,
+        environment: 'jsdom',
+        setupFiles: './vitest.setup.js',
+        css: true,
+    },
     esbuild: {
         loader: "jsx",
         include: /src\/.*\.jsx?$/,

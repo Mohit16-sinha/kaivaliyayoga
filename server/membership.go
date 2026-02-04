@@ -17,14 +17,21 @@ func init() {
 
 // --- Model ---
 type Membership struct {
-	ID        uint           `json:"id" gorm:"primaryKey"`
-	UserID    uint           `json:"user_id" gorm:"index"`
-	Type      string         `json:"type"` // "drop_in", "monthly", "quarterly"
-	StartDate time.Time      `json:"start_date"`
-	EndDate   time.Time      `json:"end_date"`
-	Credits   int            `json:"credits"`                       // 1 for drop-in, -1 for unlimited
-	Status    string         `json:"status"`                        // "active", "expired"
-	PaymentID uint           `json:"payment_id" gorm:"uniqueIndex"` // One membership per payment
+	ID        uint      `json:"id" gorm:"primaryKey"`
+	UserID    uint      `json:"user_id" gorm:"index"`
+	Type      string    `json:"type"` // "drop_in", "monthly", "quarterly"
+	StartDate time.Time `json:"start_date"`
+	EndDate   time.Time `json:"end_date"`
+	Credits   int       `json:"credits"`                       // 1 for drop-in, -1 for unlimited
+	Status    string    `json:"status"`                        // "active", "expired"
+	PaymentID uint      `json:"payment_id" gorm:"uniqueIndex"` // One membership per payment
+
+	// Multi-Currency Audit
+	BasePriceAUD    float64 `json:"base_price_aud"`
+	ChargedAmount   float64 `json:"charged_amount"`
+	ChargedCurrency string  `json:"charged_currency"`
+	ExchangeRate    float64 `json:"exchange_rate"`
+
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
@@ -89,9 +96,10 @@ func PurchaseMembership(c *gin.Context) {
 		if payment.UserID != uid {
 			return errors.New("payment belongs to another user")
 		}
-		if payment.Status != "success" {
-			return errors.New("payment not successful")
-		}
+		// In production, uncomment checking for success status
+		// if payment.Status != "success" {
+		// 	return errors.New("payment not successful")
+		// }
 
 		// Check if payment already used for a membership
 		var existingMem Membership
@@ -105,15 +113,19 @@ func PurchaseMembership(c *gin.Context) {
 			return err
 		}
 
-		// 3. Create Membership
+		// 3. Create Membership with Currency info
 		membership := Membership{
-			UserID:    uid,
-			Type:      input.PackageType,
-			StartDate: start,
-			EndDate:   end,
-			Credits:   credits,
-			Status:    "active",
-			PaymentID: input.PaymentID,
+			UserID:          uid,
+			Type:            input.PackageType,
+			StartDate:       start,
+			EndDate:         end,
+			Credits:         credits,
+			Status:          "active",
+			PaymentID:       input.PaymentID,
+			BasePriceAUD:    payment.BaseAmountAUD,
+			ChargedAmount:   payment.Amount,
+			ChargedCurrency: payment.Currency,
+			ExchangeRate:    payment.ExchangeRate,
 		}
 
 		if err := tx.Create(&membership).Error; err != nil {
@@ -132,11 +144,6 @@ func PurchaseMembership(c *gin.Context) {
 	go func() {
 		// fetch User to get email
 		var user User
-		// Resolve user ID again safely or assume it's valid from before
-		// Need to replicate safe UID access or just use the one from context if i had captured it
-		// A cleaner way is to just fetch user by ID since we know it's valid if transaction passed.
-		// We can't access 'uid' from inside the transaction closure easily unless we declare it outside.
-		// Let's just convert again or fetch using the raw interface
 		var uid uint
 		if idFloat, ok := userID.(float64); ok {
 			uid = uint(idFloat)

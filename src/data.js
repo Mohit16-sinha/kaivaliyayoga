@@ -3,4 +3,5 @@ export const navigation = [
   { href: "/about", name: "About" },
   { href: "/services", name: "Services" },
   { href: "/contact", name: "Contact" },
+  { href: "/ai-practice", name: "AI Practice" },
 ];

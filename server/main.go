@@ -135,14 +135,31 @@ func main() {
 		userRoutes.DELETE("/bookings/:id", CancelBooking)
 	}
 
+	// Initialize Razorpay
+	initRazorpay()
+
+	// Initialize PayPal
+	initPayPal()
+
 	// Payment Routes (Protected)
 	paymentRoutes := r.Group("/api/payments")
 	paymentRoutes.Use(AuthMiddleware())
 	{
-		paymentRoutes.POST("/create-order", CreateOrder)
-		paymentRoutes.POST("/verify", VerifyPayment)
-		paymentRoutes.GET("/my", GetMyPayments)
+		// Razorpay (India)
+		paymentRoutes.POST("/razorpay/create", CreateRazorpayOrder)
+		paymentRoutes.POST("/razorpay/verify", VerifyRazorpayPayment)
+
+		// PayPal (International)
+		paymentRoutes.POST("/paypal/create", CreatePayPalOrder)
+		paymentRoutes.POST("/paypal/capture/:orderId", CapturePayPalOrder)
+
+		// History
+		paymentRoutes.GET("/history", GetMyPayments)
 	}
+
+	// Public endpoints for payment config
+	r.GET("/api/payments/config", GetRazorpayKey)
+	r.GET("/api/payments/paypal/config", GetPayPalConfig)
 
 	// Membership Routes (Protected)
 	membershipRoutes := r.Group("/api/memberships")

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Badge, Spinner, Card } from '../../components/ui';
 import { useCurrency } from '../../contexts/CurrencyContext';
+import { getPaymentHistory } from '../../services/paymentService';
 
 /**
  * Payment History page - Track all transactions and invoices.
@@ -22,14 +23,29 @@ const PaymentHistory = () => {
     const fetchPayments = async () => {
         setLoading(true);
         try {
-            await new Promise(resolve => setTimeout(resolve, 500));
-            setPayments(mockPayments);
+            const data = await getPaymentHistory();
+            // Map backend data to frontend format
+            const formattedPayments = data.map(p => ({
+                id: p.id,
+                date: p.created_at,
+                professional_name: p.description || 'Kaivalya Yoga',
+                service_name: p.method || 'Payment',
+                amount: p.amount,
+                status: p.status === 'success' ? 'paid' : p.status,
+                transaction_id: p.razorpay_payment_id || p.order_id || `TXN-${p.id}`,
+                card_last4: '****',
+                service_fee: p.amount,
+                platform_fee: 0,
+            }));
+            setPayments(formattedPayments);
         } catch (error) {
             console.error('Failed to fetch payments:', error);
+            setPayments([]);
         } finally {
             setLoading(false);
         }
     };
+
 
     const filteredPayments = payments.filter(payment => {
         if (statusFilter !== 'all' && payment.status !== statusFilter) return false;
@@ -286,12 +302,5 @@ const PaymentHistory = () => {
     );
 };
 
-// Mock data
-const mockPayments = [
-    { id: 1, date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), professional_name: 'Dr. Sarah Johnson', service_name: 'Yoga Session', service_fee: 89, platform_fee: 5, amount: 94, status: 'paid', transaction_id: 'TXN-001234', card_last4: '1234' },
-    { id: 2, date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), professional_name: 'John Miller', service_name: 'Consultation', service_fee: 49, platform_fee: 3, amount: 52, status: 'refunded', transaction_id: 'TXN-001235', card_last4: '1234' },
-    { id: 3, date: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(), professional_name: 'Emily Jones', service_name: 'Therapy Session', service_fee: 120, platform_fee: 6, amount: 126, status: 'paid', transaction_id: 'TXN-001236', card_last4: '5678' },
-    { id: 4, date: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(), professional_name: 'Dr. Michael Chen', service_name: 'Nutrition Plan', service_fee: 150, platform_fee: 8, amount: 158, status: 'paid', transaction_id: 'TXN-001237', card_last4: '1234' },
-];
-
 export default PaymentHistory;
+

@@ -20,6 +20,13 @@ services:
       # Fallback to SQLite if needed, but we prefer PG now
       # - DB_NAME=/app/yoga.db 
       - JWT_SECRET=your_super_secret_key_change_in_production
+      # Razorpay (India)
+      - RAZORPAY_KEY_ID=rzp_test_RnD3wx9CshKHmH
+      - RAZORPAY_KEY_SECRET=JB0oqD7hUjawvjsIG1Os1wK8
+      # PayPal (International)
+      - PAYPAL_CLIENT_ID=ATyO30DccbcEaSJ-6NHZmPa6x_t-KN_aNgl5G814K_EF03wEdcXMPt3AnrkXiWjiCCSRYafiEFoj6Rhn
+      - PAYPAL_SECRET=EMOscscFHS5zrwNR1m_6aNETFIe1D3SkRjheSVtbGNGY-zIXUn2Q6RhCVDUecLF7zFXkpg-NtjAtPqTh
+      - PAYPAL_MODE=sandbox
     volumes:
       - ./server:/app
       - yoga-db:/app/data

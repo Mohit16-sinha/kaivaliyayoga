@@ -1,20 +1,28 @@
 package main
 
 import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	razorpay "github.com/razorpay/razorpay-go"
 	"gorm.io/gorm"
 )
 
-// --- Constants (Test Credentials) ---
-const (
-	// RazorpayKeyID     = "rzp_test_Ry9n9CKJV1BqB3"
-	// RazorpayKeySecret = "gYXAIu1KEMBsI6tOBpzoncUL"
-	StripePublishableKey = "pk_test_placeholder"
-)
+// --- Razorpay Client ---
+var razorpayClient *razorpay.Client
+
+func initRazorpay() {
+	razorpayClient = razorpay.NewClient(
+		os.Getenv("RAZORPAY_KEY_ID"),
+		os.Getenv("RAZORPAY_KEY_SECRET"),
+	)
+}
 
 // --- Model ---
 type Payment struct {
@@ -35,7 +43,7 @@ type Payment struct {
 	Method string `json:"method"` // card, upi, etc.
 	Status string `json:"status"` // created, success, failed
 
-	// Razorpay fields (Legacy/Disabled)
+	// Razorpay fields
 	RazorpayPaymentID string `json:"razorpay_payment_id"`
 
 	CreatedAt time.Time      `json:"created_at"`
@@ -52,124 +60,140 @@ type CreateOrderInput struct {
 }
 
 type VerifyPaymentInput struct {
-	OrderID   string `json:"order_id" binding:"required"`
-	PaymentID string `json:"payment_id"` // Generic
-	// RazorpayPaymentID string `json:"razorpay_payment_id"`
-	// RazorpaySignature string `json:"razorpay_signature"`
+	OrderID           string `json:"order_id" binding:"required"`
+	RazorpayPaymentID string `json:"razorpay_payment_id" binding:"required"`
+	RazorpaySignature string `json:"razorpay_signature" binding:"required"`
 }
 
 // --- Handlers ---
 
-// CreateOrder - Protected - Creates a Payment Intent (Placeholder for Stripe)
-func CreateOrder(c *gin.Context) {
-	// RAZORPAY DISABLED
-	/*
-		userID, _ := c.Get("userID")
+// CreateRazorpayOrder - Protected - Creates a Razorpay Order
+func CreateRazorpayOrder(c *gin.Context) {
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
 
-		var input CreateOrderInput
-		if err := c.ShouldBindJSON(&input); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
+	var input CreateOrderInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
-		client := razorpay.NewClient(RazorpayKeyID, RazorpayKeySecret)
+	// Safely convert userID
+	var uid uint
+	switch v := userID.(type) {
+	case float64:
+		uid = uint(v)
+	case uint:
+		uid = v
+	case int:
+		uid = uint(v)
+	default:
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID"})
+		return
+	}
 
-		data := map[string]interface{}{
-			"amount":   int(input.Amount * 100), // Amount in paise
-			"currency": input.Currency,
-			"receipt":  "receipt_order_123", // You might want to generate unique receipt IDs
-		}
+	// Create Razorpay order
+	data := map[string]interface{}{
+		"amount":   int(input.Amount * 100), // Amount in paise
+		"currency": "INR",
+		"receipt":  fmt.Sprintf("order_%d_%d", uid, time.Now().Unix()),
+	}
 
-		body, err := client.Order.Create(data, nil)
-		if err != nil {
-			fmt.Println("RAZORPAY ERROR:", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create order", "details": err.Error()})
-			return
-		}
+	order, err := razorpayClient.Order.Create(data, nil)
+	if err != nil {
+		fmt.Println("RAZORPAY ERROR:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create order", "details": err.Error()})
+		return
+	}
 
-		orderID := body["id"].(string)
+	orderID := order["id"].(string)
 
-		// Safely convert userID
-		var uid uint
-		if idFloat, ok := userID.(float64); ok {
-			uid = uint(idFloat)
-		} else if idUint, ok := userID.(uint); ok {
-			uid = idUint
-		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID in context"})
-			return
-		}
-
-		// Save initial payment record
-		payment := Payment{
-			UserID:   uid,
-			OrderID:  orderID,
-			Amount:   input.Amount,
-			Currency: input.Currency,
-			Status:   "created",
-		}
-		db.Create(&payment)
-
-		c.JSON(http.StatusOK, gin.H{
-			"order_id": orderID,
-			"key_id":   RazorpayKeyID,
-			"amount":   input.Amount * 100,
-			"currency": input.Currency,
-		})
-	*/
+	// Save initial payment record
+	payment := Payment{
+		UserID:        uid,
+		OrderID:       orderID,
+		Amount:        input.Amount,
+		Currency:      "INR",
+		BaseAmountAUD: input.BaseAmountAUD,
+		CountryCode:   input.CountryCode,
+		Status:        "created",
+	}
+	db.Create(&payment)
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Payment system is currently being upgraded to support global currencies.",
-		"status":  "coming_soon",
+		"order_id":   orderID,
+		"key_id":     os.Getenv("RAZORPAY_KEY_ID"),
+		"amount":     int(input.Amount * 100),
+		"currency":   "INR",
+		"payment_id": payment.ID,
 	})
 }
 
-// VerifyPayment - Protected - Verifies Signature and Updates Status
-func VerifyPayment(c *gin.Context) {
-	// RAZORPAY DISABLED
-	/*
-		var input VerifyPaymentInput
-		if err := c.ShouldBindJSON(&input); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
+// VerifyRazorpayPayment - Protected - Verifies Signature and Updates Status
+func VerifyRazorpayPayment(c *gin.Context) {
+	var input VerifyPaymentInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
-		// Verify Signature
-		// HMAC SHA256 of (order_id + "|" + razorpay_payment_id) using secret
-		data := input.OrderID + "|" + input.RazorpayPaymentID
-		h := hmac.New(sha256.New, []byte(RazorpayKeySecret))
-		h.Write([]byte(data))
-		expectedSignature := hex.EncodeToString(h.Sum(nil))
+	// Verify Signature using HMAC SHA256
+	// Signature = HMAC-SHA256(order_id + "|" + razorpay_payment_id, secret)
+	data := input.OrderID + "|" + input.RazorpayPaymentID
+	h := hmac.New(sha256.New, []byte(os.Getenv("RAZORPAY_KEY_SECRET")))
+	h.Write([]byte(data))
+	expectedSignature := hex.EncodeToString(h.Sum(nil))
 
-		if expectedSignature != input.RazorpaySignature {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid signature"})
-			return
-		}
+	if expectedSignature != input.RazorpaySignature {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid payment signature"})
+		return
+	}
 
-		// Update Payment Record
-		var payment Payment
-		if err := db.Where("order_id = ?", input.OrderID).First(&payment).Error; err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Order not found"})
-			return
-		}
+	// Update Payment Record
+	var payment Payment
+	if err := db.Where("order_id = ?", input.OrderID).First(&payment).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Order not found"})
+		return
+	}
 
-		payment.Status = "success"
-		payment.RazorpayPaymentID = input.RazorpayPaymentID
-		payment.Signature = input.RazorpaySignature
-		payment.PaymentID = input.RazorpayPaymentID // Redundant but explicit
-		db.Save(&payment)
+	payment.Status = "success"
+	payment.RazorpayPaymentID = input.RazorpayPaymentID
+	payment.Signature = input.RazorpaySignature
+	payment.PaymentID = input.RazorpayPaymentID
+	db.Save(&payment)
 
-		c.JSON(http.StatusOK, gin.H{"message": "Payment verified", "payment_id": payment.ID})
-	*/
-
-	fmt.Println("Verify Payment called (Placeholder)")
-	c.JSON(http.StatusOK, gin.H{"message": "Payment verified (Simulation)"})
+	c.JSON(http.StatusOK, gin.H{
+		"message":    "Payment verified successfully",
+		"payment_id": payment.ID,
+		"status":     "success",
+	})
 }
 
-// GetMyPayments - Protected - History
+// GetMyPayments - Protected - Get payment history for user
 func GetMyPayments(c *gin.Context) {
 	userID, _ := c.Get("userID")
+
+	var uid uint
+	switch v := userID.(type) {
+	case float64:
+		uid = uint(v)
+	case uint:
+		uid = v
+	case int:
+		uid = uint(v)
+	}
+
 	var payments []Payment
-	db.Where("user_id = ?", userID).Order("created_at desc").Find(&payments)
+	db.Where("user_id = ?", uid).Order("created_at desc").Find(&payments)
 	c.JSON(http.StatusOK, payments)
+}
+
+// GetRazorpayKey - Public - Returns publishable key for frontend
+func GetRazorpayKey(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"key_id": os.Getenv("RAZORPAY_KEY_ID"),
+	})
 }

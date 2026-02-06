@@ -28,7 +28,6 @@ func initRazorpay() {
 type Payment struct {
 	ID        uint   `json:"id" gorm:"primaryKey"`
 	UserID    uint   `json:"user_id" gorm:"index"`
-	User      User   `json:"user" gorm:"foreignKey:UserID"`
 	OrderID   string `json:"order_id" gorm:"index"`
 	PaymentID string `json:"payment_id" gorm:"index"`
 	Signature string `json:"-"`
@@ -90,8 +89,14 @@ func CreateRazorpayOrder(c *gin.Context) {
 		uid = v
 	case int:
 		uid = uint(v)
+	case string:
+		// Handle string userID (shouldn't happen but just in case)
+		var parsed int
+		fmt.Sscanf(v, "%d", &parsed)
+		uid = uint(parsed)
 	default:
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID"})
+		fmt.Printf("Unknown userID type: %T value: %v\n", userID, userID)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID type"})
 		return
 	}
 
@@ -111,6 +116,9 @@ func CreateRazorpayOrder(c *gin.Context) {
 
 	orderID := order["id"].(string)
 
+	// DEBUG: Print the uid value
+	fmt.Printf("DEBUG: Creating payment - userID type=%T, value=%v, uid=%d\n", userID, userID, uid)
+
 	// Save initial payment record
 	payment := Payment{
 		UserID:        uid,
@@ -121,7 +129,12 @@ func CreateRazorpayOrder(c *gin.Context) {
 		CountryCode:   input.CountryCode,
 		Status:        "created",
 	}
-	db.Create(&payment)
+	fmt.Printf("DEBUG: Payment struct - UserID=%d, OrderID=%s, Amount=%f\n", payment.UserID, payment.OrderID, payment.Amount)
+	if err := db.Create(&payment).Error; err != nil {
+		fmt.Println("DB ERROR:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save payment record"})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"order_id":   orderID,

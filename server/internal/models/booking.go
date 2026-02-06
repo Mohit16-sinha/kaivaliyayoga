@@ -8,13 +8,13 @@ import (
 )
 
 type Booking struct {
-	ID           uint        `json:"id" gorm:"primaryKey"`
-	UserID       uint        `json:"user_id" gorm:"index"`
-	User         User        `json:"user" gorm:"foreignKey:UserID"`
-	ClassID      uint        `json:"class_id" gorm:"index"`
-	Class        Class       `json:"class" gorm:"foreignKey:ClassID"`
-	PaymentID    *uint       `json:"payment_id" gorm:"index"` // Nullable if using membership
-	Payment      *Payment    `json:"payment" gorm:"foreignKey:PaymentID"`
+	ID        uint  `json:"id" gorm:"primaryKey"`
+	UserID    uint  `json:"user_id" gorm:"index"`
+	User      User  `json:"user" gorm:"foreignKey:UserID"`
+	ClassID   uint  `json:"class_id" gorm:"index"`
+	Class     Class `json:"class" gorm:"foreignKey:ClassID"`
+	PaymentID *uint `json:"payment_id" gorm:"index"` // Nullable if using membership
+	// Note: No Payment relationship to avoid FK constraint issues
 	MembershipID *uint       `json:"membership_id" gorm:"index"` // Nullable if pay-per-class
 	Membership   *Membership `json:"membership" gorm:"foreignKey:MembershipID"`
 

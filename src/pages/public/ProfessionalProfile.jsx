@@ -3,6 +3,8 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Button, Badge, Avatar, Card, Tabs, Spinner, EmptyState } from '../../components/ui';
 import professionalService from '../../services/professionalService';
 import appointmentService from '../../services/appointmentService';
+import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+import { initiateRazorpayPayment, getPayPalConfig, createPayPalOrder, capturePayPalOrder } from '../../services/paymentService';
 import { useCurrency } from '../../contexts/CurrencyContext';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -18,6 +20,8 @@ const BookingModal = ({ isOpen, onClose, professional, service, services = [] })
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
+    const [paymentMethod, setPaymentMethod] = useState('razorpay'); // 'razorpay' | 'paypal'
+    const [paypalClientId, setPaypalClientId] = useState(null);
 
     // Reset form when modal opens
     useEffect(() => {
@@ -28,16 +32,42 @@ const BookingModal = ({ isOpen, onClose, professional, service, services = [] })
             setNotes('');
             setError('');
             setSuccess(false);
+            setPaymentMethod('razorpay');
+
+            // Fetch PayPal Config
+            getPayPalConfig().then(config => {
+                if (config?.client_id) setPaypalClientId(config.client_id);
+            }).catch(err => console.error("Failed to load PayPal config", err));
         }
     }, [isOpen, service, services]);
 
     if (!isOpen) return null;
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    // Common appointment data builder
+    const buildAppointmentData = () => {
+        const selectedSvc = services.find(s => String(s.id) === String(selectedServiceId)) || service;
+        const durationMinutes = selectedSvc?.duration_minutes || selectedSvc?.duration || 60;
+        const startDateTime = new Date(`${selectedDate}T${selectedTime}:00`);
+        const endDateTime = new Date(startDateTime.getTime() + durationMinutes * 60000);
+
+        return {
+            professional_id: String(professional?.id),
+            service_id: String(selectedServiceId),
+            start_time: startDateTime.toISOString(),
+            end_time: endDateTime.toISOString(),
+            client_notes: notes,
+            // Helper for payment amount
+            priceInPaise: (selectedSvc?.price_cents || selectedSvc?.price * 100 || 5000),
+            price: (selectedSvc?.price_cents / 100 || selectedSvc?.price || 50),
+            currency: selectedSvc?.currency || 'USD',
+            serviceName: selectedSvc?.name || 'Service'
+        };
+    };
+
+    const handleRazorpaySubmit = async (e) => {
+        e?.preventDefault();
         setError('');
 
-        // Check if user is logged in
         if (!user) {
             setError('Please sign in to book an appointment');
             setTimeout(() => {
@@ -52,40 +82,54 @@ const BookingModal = ({ isOpen, onClose, professional, service, services = [] })
             return;
         }
 
-        // Find selected service to get duration
-        const selectedSvc = services.find(s => String(s.id) === String(selectedServiceId)) || service;
-        const durationMinutes = selectedSvc?.duration_minutes || selectedSvc?.duration || 60;
-
-        // Build start and end times (RFC3339 format)
-        const startDateTime = new Date(`${selectedDate}T${selectedTime}:00`);
-        const endDateTime = new Date(startDateTime.getTime() + durationMinutes * 60000);
-
-        const appointmentData = {
-            professional_id: professional?.id,
-            service_id: selectedServiceId,
-            start_time: startDateTime.toISOString(),
-            end_time: endDateTime.toISOString(),
-            client_notes: notes,
-        };
-
+        const data = buildAppointmentData();
         setIsSubmitting(true);
+
         try {
-            await appointmentService.create(appointmentData);
-            setSuccess(true);
-            setTimeout(() => {
-                onClose();
-                navigate('/appointments');
-            }, 2000);
+            // Step 1: Initiate Payment via Razorpay
+            await initiateRazorpayPayment({
+                amount: data.priceInPaise, // Amount in paise
+                description: `Appointment with ${professional?.name || professional?.user?.name || 'Professional'} - ${data.serviceName}`,
+                prefill: {
+                    name: user?.name || '',
+                    email: user?.email || '',
+                    contact: user?.phone || '',
+                },
+                onSuccess: async (paymentData) => {
+                    try {
+                        // Step 2: After payment success, create the appointment
+                        const finalAppointmentData = {
+                            professional_id: data.professional_id,
+                            service_id: data.service_id,
+                            start_time: data.start_time,
+                            end_time: data.end_time,
+                            client_notes: data.client_notes,
+                            payment_id: paymentData.payment_id
+                        };
+                        await appointmentService.create(finalAppointmentData);
+                        setSuccess(true);
+                        setTimeout(() => {
+                            onClose();
+                            navigate('/dashboard/appointments');
+                        }, 2000);
+                    } catch (aptErr) {
+                        console.error('Appointment creation error:', aptErr);
+                        setError('Payment successful but booking failed. Please contact support with payment ID: ' + paymentData.razorpay_payment_id);
+                        setIsSubmitting(false);
+                    }
+                },
+                onError: (error) => {
+                    console.error('Payment error:', error);
+                    setError(error.message || 'Payment failed. Please try again.');
+                    setIsSubmitting(false);
+                },
+            });
         } catch (err) {
             console.error('Booking error:', err);
-            setError(err.response?.data?.message || err.message || 'Failed to create booking. Please try again.');
-        } finally {
+            setError(err.response?.data?.error || err.message || 'Failed to initiate payment. Please try again.');
             setIsSubmitting(false);
         }
     };
-
-    // Get minimum date (today)
-    const today = new Date().toISOString().split('T')[0];
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
@@ -108,7 +152,7 @@ const BookingModal = ({ isOpen, onClose, professional, service, services = [] })
                         <p className="text-earth-500">Redirecting to your appointments...</p>
                     </div>
                 ) : (
-                    <form className="space-y-4" onSubmit={handleSubmit}>
+                    <div className="space-y-4">
                         {/* Professional Info */}
                         <div className="flex items-center gap-4 p-4 bg-earth-50 rounded-lg">
                             <Avatar src={professional?.user?.profile_image_url || professional?.profile_image_url} name={professional?.user?.name || professional?.name} size="md" />
@@ -144,7 +188,7 @@ const BookingModal = ({ isOpen, onClose, professional, service, services = [] })
                                 type="date"
                                 value={selectedDate}
                                 onChange={(e) => setSelectedDate(e.target.value)}
-                                min={today}
+                                min={new Date().toISOString().split('T')[0]}
                                 className="w-full bg-white text-earth-900 border border-earth-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                                 required
                             />
@@ -183,6 +227,33 @@ const BookingModal = ({ isOpen, onClose, professional, service, services = [] })
                             />
                         </div>
 
+                        {/* Payment Method Selection */}
+                        <div>
+                            <label className="block text-sm font-medium text-earth-700 mb-2">Payment Method</label>
+                            <div className="grid grid-cols-2 gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setPaymentMethod('razorpay')}
+                                    className={`p-3 rounded-lg border text-center transition-all ${paymentMethod === 'razorpay'
+                                        ? 'border-primary-600 bg-primary-50 text-primary-700 font-medium ring-1 ring-primary-600'
+                                        : 'border-earth-200 text-earth-600 hover:border-earth-300'
+                                        }`}
+                                >
+                                    Razorpay (Card/UPI)
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setPaymentMethod('paypal')}
+                                    className={`p-3 rounded-lg border text-center transition-all ${paymentMethod === 'paypal'
+                                        ? 'border-blue-600 bg-blue-50 text-blue-700 font-medium ring-1 ring-blue-600'
+                                        : 'border-earth-200 text-earth-600 hover:border-earth-300'
+                                        }`}
+                                >
+                                    PayPal
+                                </button>
+                            </div>
+                        </div>
+
                         {/* Error Message */}
                         {error && (
                             <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
@@ -190,16 +261,89 @@ const BookingModal = ({ isOpen, onClose, professional, service, services = [] })
                             </div>
                         )}
 
-                        {/* Buttons */}
-                        <div className="pt-4 flex gap-3">
+                        {/* Action Buttons */}
+                        <div className="pt-4 flex gap-3 flex-col sm:flex-row">
                             <Button type="button" variant="ghost" className="flex-1" onClick={onClose} disabled={isSubmitting}>
                                 Cancel
                             </Button>
-                            <Button type="submit" variant="primary" className="flex-1" disabled={isSubmitting}>
-                                {isSubmitting ? 'Booking...' : 'Confirm Booking'}
-                            </Button>
+
+                            {paymentMethod === 'razorpay' ? (
+                                <Button
+                                    type="button"
+                                    variant="primary"
+                                    className="flex-1"
+                                    disabled={isSubmitting}
+                                    onClick={handleRazorpaySubmit}
+                                >
+                                    {isSubmitting ? 'Processing...' : 'Confirm & Pay (Razorpay)'}
+                                </Button>
+                            ) : (
+                                <div className="flex-1">
+                                    {paypalClientId ? (
+                                        <PayPalScriptProvider options={{ "client-id": paypalClientId, currency: "USD" }}>
+                                            <PayPalButtons
+                                                style={{ layout: "horizontal", height: 44 }}
+                                                forceReRender={[selectedServiceId, selectedDate, selectedTime]}
+                                                createOrder={async (data, actions) => {
+                                                    // Validation
+                                                    if (!selectedDate || !selectedTime) {
+                                                        setError('Please select date and time');
+                                                        return Promise.reject(new Error('Missing fields'));
+                                                    }
+                                                    const apptData = buildAppointmentData();
+                                                    try {
+                                                        // Call backend to create order
+                                                        const order = await createPayPalOrder(
+                                                            apptData.price,
+                                                            apptData.currency,
+                                                            `Appointment: ${apptData.serviceName}`
+                                                        );
+                                                        return order.order_id; // Backend must return 'order_id'
+                                                    } catch (err) {
+                                                        console.error("PayPal Create Order Error", err);
+                                                        setError("Failed to initialize PayPal.");
+                                                        throw err;
+                                                    }
+                                                }}
+                                                onApprove={async (data, actions) => {
+                                                    try {
+                                                        const apptData = buildAppointmentData();
+                                                        // Backend capture
+                                                        const captureResult = await capturePayPalOrder(data.orderID);
+
+                                                        if (captureResult.status === 'success') {
+                                                            // Create Appointment
+                                                            const finalAppointmentData = {
+                                                                professional_id: apptData.professional_id,
+                                                                service_id: apptData.service_id,
+                                                                start_time: apptData.start_time,
+                                                                end_time: apptData.end_time,
+                                                                client_notes: apptData.client_notes,
+                                                                payment_id: captureResult.payment_id
+                                                            };
+                                                            await appointmentService.create(finalAppointmentData);
+                                                            setSuccess(true);
+                                                            setTimeout(() => {
+                                                                onClose();
+                                                                navigate('/dashboard/appointments');
+                                                            }, 2000);
+                                                        }
+                                                    } catch (err) {
+                                                        console.error("PayPal Capture Error", err);
+                                                        // Show detailed error from backend if available
+                                                        const errorDetails = err.response?.data?.details || err.response?.data?.error || "Payment failed during capture.";
+                                                        setError(`Capture Failed: ${errorDetails}`);
+                                                    }
+                                                }}
+                                            />
+                                        </PayPalScriptProvider>
+                                    ) : (
+                                        <div className="text-center text-sm text-gray-500 py-2">Loading PayPal...</div>
+                                    )}
+                                </div>
+                            )}
                         </div>
-                    </form>
+                    </div>
                 )}
             </div>
         </div>
@@ -732,7 +876,7 @@ const ProfessionalProfile = () => {
 
 // Mock data
 const mockProfessional = {
-    id: 1,
+    id: 'a1b2c3d4-e5f6-4789-abcd-ef0123456789',
     name: 'Dr. Sarah Johnson',
     type: 'yoga_therapist',
     specialization: 'Therapeutic Yoga & Meditation',
@@ -753,9 +897,9 @@ const mockProfessional = {
 };
 
 const mockServices = [
-    { id: 1, name: 'Initial Yoga Therapy Consultation', duration_minutes: 30, price_cents: 4900, description: 'Perfect for first-time clients. We will discuss your health goals and create a personalized plan.' },
-    { id: 2, name: '1-on-1 Therapeutic Yoga Session', duration_minutes: 60, price_cents: 8900, description: 'Personalized session tailored to your specific needs and goals.' },
-    { id: 3, name: '8-Week Transformation Program', duration_minutes: 480, price_cents: 65000, description: 'Comprehensive wellness program with 8 sessions (60 min each). Save $62!' },
+    { id: 'b1c2d3e4-f5a6-4789-bcde-f01234567890', name: 'Initial Yoga Therapy Consultation', duration_minutes: 30, price_cents: 4900, description: 'Perfect for first-time clients. We will discuss your health goals and create a personalized plan.' },
+    { id: 'c2d3e4f5-a6b7-4890-cdef-012345678901', name: '1-on-1 Therapeutic Yoga Session', duration_minutes: 60, price_cents: 8900, description: 'Personalized session tailored to your specific needs and goals.' },
+    { id: 'd3e4f5a6-b7c8-4901-def0-123456789012', name: '8-Week Transformation Program', duration_minutes: 480, price_cents: 65000, description: 'Comprehensive wellness program with 8 sessions (60 min each). Save $62!' },
 ];
 
 const mockReviews = [

@@ -21,7 +21,7 @@ const DashboardLayout = ({ userType = 'client' }) => {
                 <main className="flex-grow md:ml-64 relative overflow-y-auto min-h-screen">
                     {/* Background Images - First Layer, Clearly Visible */}
                     {isClient && (
-                        <div className="fixed top-16 right-0 bottom-0 left-0 md:left-64 overflow-hidden">
+                        <div className="fixed top-16 right-0 bottom-0 left-0 md:left-64 overflow-hidden pointer-events-none z-0">
                             {/* Base background color */}
                             <div className="absolute inset-0 bg-gradient-to-br from-amber-50 via-white to-teal-50 dark:from-earth-900 dark:via-earth-900 dark:to-earth-900 transition-colors duration-500" />
 

@@ -138,7 +138,7 @@ func GetAdminRevenue(c *gin.Context) {
 	}
 
 	var payments []Payment
-	db.Preload("User").Where("created_at BETWEEN ? AND ? AND status = ?", fromDate, toDate, "success").Find(&payments)
+	db.Where("created_at BETWEEN ? AND ? AND status = ?", fromDate, toDate, "success").Find(&payments)
 
 	if exportCSV {
 		c.Header("Content-Type", "text/csv")
@@ -150,7 +150,7 @@ func GetAdminRevenue(c *gin.Context) {
 			writer.Write([]string{
 				fmt.Sprintf("%d", p.ID),
 				p.CreatedAt.Format("2006-01-02 15:04"),
-				p.User.Name,
+				fmt.Sprintf("User %d", p.UserID),
 				fmt.Sprintf("%.2f", p.Amount),
 				p.Method,
 				p.OrderID,

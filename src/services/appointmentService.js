@@ -1,7 +1,7 @@
 import apiClient from './api';
 
 /**
- * Appointment Service - handles booking/appointment API calls.
+ * Appointment Service - handles booking/appointment API calls for professionals.
  */
 const appointmentService = {
     /**
@@ -9,7 +9,7 @@ const appointmentService = {
      * @returns {Promise<{upcoming: array, past: array, cancelled: array}>}
      */
     getAll: async () => {
-        const response = await apiClient.get('/api/v1/appointments');
+        const response = await apiClient.get('/user/appointments');
         const appointments = response.data.data || response.data || [];
 
         // Categorize appointments
@@ -34,12 +34,12 @@ const appointmentService = {
     },
 
     /**
-     * Create a new appointment.
-     * @param {object} data - { service_id, start_time, end_time, client_notes }
+     * Create a new appointment with a professional.
+     * @param {object} data - { professional_id, service_id, start_time, end_time, client_notes }
      * @returns {Promise<object>}
      */
     create: async (data) => {
-        const response = await apiClient.post('/api/v1/appointments', data);
+        const response = await apiClient.post('/user/appointments', data);
         return response.data.data || response.data;
     },
 
@@ -49,7 +49,7 @@ const appointmentService = {
      * @returns {Promise<object>}
      */
     getById: async (id) => {
-        const response = await apiClient.get(`/api/v1/appointments/${id}`);
+        const response = await apiClient.get(`/user/appointments/${id}`);
         return response.data.data || response.data;
     },
 
@@ -60,7 +60,7 @@ const appointmentService = {
      * @returns {Promise<object>}
      */
     cancel: async (id, reason = '') => {
-        const response = await apiClient.delete(`/api/v1/appointments/${id}`, {
+        const response = await apiClient.delete(`/user/appointments/${id}`, {
             data: { reason }
         });
         return response.data;
@@ -74,7 +74,7 @@ const appointmentService = {
      * @returns {Promise<object>}
      */
     reschedule: async (id, startTime, endTime) => {
-        const response = await apiClient.put(`/api/v1/appointments/${id}`, {
+        const response = await apiClient.put(`/user/appointments/${id}`, {
             start_time: startTime,
             end_time: endTime
         });

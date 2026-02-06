@@ -11,7 +11,7 @@ export const loadRazorpayScript = () => {
             resolve(true);
             return;
         }
-        
+
         const script = document.createElement('script');
         script.src = 'https://checkout.razorpay.com/v1/checkout.js';
         script.async = true;
@@ -52,6 +52,28 @@ export const getPaymentHistory = async () => {
     return response.data;
 };
 
+// Download Invoice
+export const downloadInvoice = async (paymentId) => {
+    try {
+        const response = await apiClient.get(`/api/payments/${paymentId}/invoice`, {
+            responseType: 'blob',
+        });
+
+        // Create blob link to download
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `invoice_${paymentId}.pdf`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error("Failed to download invoice:", error);
+        throw error;
+    }
+};
+
 /**
  * Main function to initiate Razorpay payment
  * @param {Object} options - Payment options
@@ -82,7 +104,7 @@ export const initiateRazorpayPayment = async (options) => {
             name: 'Kaivalya Yoga',
             description: options.description || 'Payment',
             order_id: orderData.order_id,
-            prefill: {
+            prefill: options.prefill || {
                 name: options.name || '',
                 email: options.email || '',
                 contact: options.phone || '',
@@ -94,7 +116,7 @@ export const initiateRazorpayPayment = async (options) => {
                 try {
                     // 5. Verify payment on backend
                     const verifyResult = await verifyRazorpayPayment(response);
-                    
+
                     if (options.onSuccess) {
                         options.onSuccess({
                             ...verifyResult,
@@ -138,6 +160,26 @@ export const initiateRazorpayPayment = async (options) => {
     }
 };
 
+// PayPal Exports
+export const getPayPalConfig = async () => {
+    const response = await apiClient.get('/api/payments/paypal/config');
+    return response.data;
+};
+
+export const createPayPalOrder = async (amount, currency, description) => {
+    const response = await apiClient.post('/api/payments/paypal/create', {
+        amount,
+        currency,
+        description
+    });
+    return response.data; // { order_id, payment_id }
+};
+
+export const capturePayPalOrder = async (orderId) => {
+    const response = await apiClient.post(`/api/payments/paypal/capture/${orderId}`);
+    return response.data; // { status, payment_id }
+};
+
 export default {
     loadRazorpayScript,
     getRazorpayConfig,
@@ -145,4 +187,8 @@ export default {
     verifyRazorpayPayment,
     getPaymentHistory,
     initiateRazorpayPayment,
+    downloadInvoice,
+    getPayPalConfig,
+    createPayPalOrder,
+    capturePayPalOrder,
 };

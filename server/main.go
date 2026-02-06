@@ -79,9 +79,9 @@ func main() {
 	}
 
 	// Data Migration Check
-	if os.Getenv("MIGRATE_SQLITE") == "true" {
-		MigrateFromSQLite(db)
-	}
+	// if os.Getenv("MIGRATE_SQLITE") == "true" {
+	// 	MigrateFromSQLite(db)
+	// }
 
 	// Seed Data
 	SeedPrograms()
@@ -94,7 +94,7 @@ func main() {
 		AllowOrigins:     []string{"http://localhost:5173", "http://localhost:3000"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
-		ExposeHeaders:    []string{"Content-Length"},
+		ExposeHeaders:    []string{"Content-Length", "Content-Disposition"},
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}))
@@ -129,10 +129,17 @@ func main() {
 		userRoutes.GET("/profile", GetProfile)
 		userRoutes.PUT("/profile", UpdateProfile)
 
-		// Booking Routes
+		// Class Booking Routes
 		userRoutes.POST("/bookings", CreateBooking)
 		userRoutes.GET("/bookings", GetMyBookings)
 		userRoutes.DELETE("/bookings/:id", CancelBooking)
+
+		// Professional Appointment Routes
+		userRoutes.POST("/appointments", CreateAppointment)
+		userRoutes.GET("/appointments", GetMyAppointments)
+		userRoutes.GET("/appointments/:id", GetAppointmentByID)
+		userRoutes.PUT("/appointments/:id", RescheduleAppointment)
+		userRoutes.DELETE("/appointments/:id", CancelAppointment)
 	}
 
 	// Initialize Razorpay
@@ -155,6 +162,7 @@ func main() {
 
 		// History
 		paymentRoutes.GET("/history", GetMyPayments)
+		paymentRoutes.GET("/:id/invoice", GenerateInvoice)
 	}
 
 	// Public endpoints for payment config

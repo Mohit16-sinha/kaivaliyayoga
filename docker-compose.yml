@@ -21,8 +21,8 @@ services:
       # - DB_NAME=/app/yoga.db 
       - JWT_SECRET=your_super_secret_key_change_in_production
       # Razorpay (India)
-      - RAZORPAY_KEY_ID=rzp_test_RnD3wx9CshKHmH
-      - RAZORPAY_KEY_SECRET=JB0oqD7hUjawvjsIG1Os1wK8
+      - RAZORPAY_KEY_ID=rzp_test_SCawC0AKKXtBzI
+      - RAZORPAY_KEY_SECRET=Su2aUsiSYAwOEd8a3jXQlYb3
       # PayPal (International)
       - PAYPAL_CLIENT_ID=ATyO30DccbcEaSJ-6NHZmPa6x_t-KN_aNgl5G814K_EF03wEdcXMPt3AnrkXiWjiCCSRYafiEFoj6Rhn
       - PAYPAL_SECRET=EMOscscFHS5zrwNR1m_6aNETFIe1D3SkRjheSVtbGNGY-zIXUn2Q6RhCVDUecLF7zFXkpg-NtjAtPqTh

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Badge, Spinner, Card } from '../../components/ui';
 import { useCurrency } from '../../contexts/CurrencyContext';
-import { getPaymentHistory } from '../../services/paymentService';
+import { getPaymentHistory, downloadInvoice } from '../../services/paymentService';
 
 /**
  * Payment History page - Track all transactions and invoices.
@@ -10,6 +10,7 @@ const PaymentHistory = () => {
     const { formatPrice } = useCurrency();
     const [payments, setPayments] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [downloadingId, setDownloadingId] = useState(null); // Track downloading state
     const [dateRange, setDateRange] = useState('30');
     const [statusFilter, setStatusFilter] = useState('all');
     const [currentPage, setCurrentPage] = useState(1);
@@ -19,6 +20,20 @@ const PaymentHistory = () => {
     useEffect(() => {
         fetchPayments();
     }, [dateRange, statusFilter]);
+
+    const handleDownloadInvoice = async (paymentId, e) => {
+        if (e) e.stopPropagation();
+        alert('Debug: Button Clicked for ID ' + paymentId);
+        setDownloadingId(paymentId);
+        try {
+            await downloadInvoice(paymentId);
+        } catch (error) {
+            console.error('Failed to download invoice:', error);
+            alert(`Download failed: ${error.message || 'Unknown error'}`);
+        } finally {
+            setDownloadingId(null);
+        }
+    };
 
     const fetchPayments = async () => {
         setLoading(true);
@@ -176,8 +191,13 @@ const PaymentHistory = () => {
                                                 {getStatusBadge(payment.status)}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); }}>
-                                                    📄 PDF
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={(e) => handleDownloadInvoice(payment.id, e)}
+                                                    disabled={downloadingId === payment.id}
+                                                >
+                                                    {downloadingId === payment.id ? 'Loading...' : '📄 PDF'}
                                                 </Button>
                                             </td>
                                         </tr>
@@ -287,8 +307,13 @@ const PaymentHistory = () => {
                             </div>
 
                             <div className="mt-6 flex gap-2">
-                                <Button variant="primary" className="flex-1">
-                                    Download Invoice
+                                <Button
+                                    variant="primary"
+                                    className="flex-1"
+                                    onClick={(e) => handleDownloadInvoice(selectedPayment.id, e)}
+                                    disabled={downloadingId === selectedPayment.id}
+                                >
+                                    {downloadingId === selectedPayment.id ? 'Generating...' : 'Download Invoice'}
                                 </Button>
                                 <Button variant="ghost" onClick={() => setSelectedPayment(null)}>
                                     Close

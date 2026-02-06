@@ -243,17 +243,35 @@ func CapturePayPalOrder(c *gin.Context) {
 	defer resp.Body.Close()
 
 	respBody, _ := io.ReadAll(resp.Body)
-	var captureRes map[string]interface{}
-	json.Unmarshal(respBody, &captureRes)
+	fmt.Println("PAYPAL CAPTURE RESPONSE:", string(respBody)) // Debug log
 
-	status := captureRes["status"].(string)
+	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":   "PayPal capture failed upstream",
+			"details": string(respBody),
+		})
+		return
+	}
+
+	var captureRes map[string]interface{}
+	if err := json.Unmarshal(respBody, &captureRes); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse PayPal response"})
+		return
+	}
+
+	status, ok := captureRes["status"].(string)
+	if !ok {
+		// Handle case where status is missing or not a string
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid PayPal response format", "response": captureRes})
+		return
+	}
 
 	if status == "COMPLETED" {
 		// Update payment record
 		var payment Payment
 		if err := db.Where("order_id = ?", orderID).First(&payment).Error; err == nil {
 			payment.Status = "success"
-			payment.PaymentID = orderID
+			payment.PaymentID = captureRes["id"].(string) // Use capture ID
 			db.Save(&payment)
 		}
 

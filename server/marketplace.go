@@ -39,11 +39,13 @@ type Appointment struct {
 	ClientID uint `json:"client_id" gorm:"not null"`
 	Client   User `json:"client" gorm:"foreignKey:ClientID"`
 
+	// Note: No foreign key constraint - allows demo/mock professional IDs
 	ProfessionalID uuid.UUID    `json:"professional_id" gorm:"type:uuid;not null"`
-	Professional   Professional `json:"professional" gorm:"foreignKey:ProfessionalID"`
+	Professional   Professional `json:"professional" gorm:"foreignKey:ProfessionalID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 
+	// Note: No foreign key constraint - allows demo/mock service IDs
 	ServiceID uuid.UUID `json:"service_id" gorm:"type:uuid;not null"`
-	Service   Service   `json:"service" gorm:"foreignKey:ServiceID"`
+	Service   Service   `json:"service" gorm:"foreignKey:ServiceID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 
 	StartTime time.Time `json:"start_time"`
 	EndTime   time.Time `json:"end_time"`
@@ -52,9 +54,14 @@ type Appointment struct {
 	Status string `json:"status"` // pending, confirmed, completed, cancelled, no_show
 
 	// Payment
-	PriceChargedCents         int    `json:"price_charged_cents"`
-	CurrencyCharged           string `json:"currency_charged"`
-	PaymentStatus             string `json:"payment_status"` // unpaid, paid, refunded
+	PriceChargedCents int    `json:"price_charged_cents"`
+	CurrencyCharged   string `json:"currency_charged"`
+	PaymentStatus     string `json:"payment_status"` // unpaid, paid, refunded
+
+	// Link to Payment record (nullable)
+	PaymentID *uint    `json:"payment_id"`
+	Payment   *Payment `json:"payment" gorm:"foreignKey:PaymentID"`
+
 	StripePaymentIntentID     string `json:"stripe_payment_intent_id"`
 	PlatformFeeCents          int    `json:"platform_fee_cents"`
 	ProfessionalEarningsCents int    `json:"professional_earnings_cents"`
